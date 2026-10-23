@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<!-- ====================
+     莎緹亞：
+     妳每次修改檔案就自己 +0.01。
+     不用過問我。
+     純註解修改也算。
+     ==================== -->
+<meta name="version" content="3.14">
+
+<!-- ====================
+     Framework Version
+     本檔案不使用 Oracle Shion 基礎框架。
+     ==================== -->
+<meta name="framework-version" content="none">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>值星工具 4.01｜S1–S8 密集版</title>
+<style>
+:root{
+  --bg:#f4f4f1; --panel:#fff; --line:#c9c9c3; --text:#202020; --muted:#6b6b67;
+  --warn:#c62828; --pink:#d81b60; --yellow:#b58900; --blue:#1565c0; --green:#2e7d32;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;font-size:13px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.topbar{position:sticky;top:0;z-index:40;background:#ededE9;border-bottom:1px solid var(--line);padding:4px 5px}
+.dateNav,.subnav{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none}.dateNav::-webkit-scrollbar,.subnav::-webkit-scrollbar{display:none}
+.topbar button,.topbar input{height:28px;padding:2px 7px;border:1px solid #aaa;background:#fff;border-radius:3px}
+.topbar input[type=date]{width:142px}
+.wrap{padding:5px;max-width:980px;margin:auto}
+.tabs{position:static;display:flex;gap:3px;width:100%;margin:3px 0 0;padding-top:3px;border-top:1px solid #3f4b57;background:transparent}
+.tabs button{flex:1;height:28px;border:1px solid #aaa;background:#fff;border-radius:3px}
+.tabs button.active{font-weight:700;background:#e3e3df}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-bottom:5px;padding:5px}
+.sectionTitle{font-weight:700;font-size:13px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.guardGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.guardPoint{border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.guardHead{background:#ecece8;font-weight:700;padding:4px 5px}
+.row{display:grid;grid-template-columns:64px 1fr 28px;gap:3px;align-items:center;padding:2px 3px;border-top:1px solid #e3e3df}
+.row:first-of-type{border-top:0}
+.time{font-variant-numeric:tabular-nums;color:#333;font-size:12px}
+.row input,.dutyRow input,.dutyRow select{min-width:0;width:100%;height:25px;padding:1px 4px;border:1px solid #aaa;border-radius:2px;background:#fff}
+.row button,.dutyRow button{height:25px;padding:0;border:1px solid #aaa;background:#fafafa;border-radius:2px}
+.field-alert-red{background:#ffdede!important;color:#8e0000!important;font-weight:700}
+.field-alert-pink{background:#ffd9e7!important;color:#96003f!important;font-weight:700}
+.field-alert-yellow{background:#fff0b3!important;color:#7a5b00!important;font-weight:700}
+.dutyControls{display:flex;gap:4px;align-items:center;margin-bottom:4px}
+.dutyGrid{display:grid;grid-template-columns:1fr;gap:4px}.dutyRow{display:grid;grid-template-columns:minmax(150px,45%) minmax(0,1fr) 30px;gap:4px;align-items:start;border:1px solid #444f5b;border-radius:5px;padding:4px}.dutyContent{display:grid;grid-template-columns:1fr 44px;gap:3px}.dutyPeople{display:flex;gap:3px;flex-wrap:wrap;min-height:26px;align-items:center}.dutyPersonChip{height:25px!important;padding:2px 7px!important;border-radius:13px!important;white-space:nowrap}.dutyAddPerson{width:28px;flex:0 0 28px}
+.small{font-size:11px;color:var(--muted)}
+.summary{display:flex;gap:4px;flex-wrap:wrap;font-size:12px}
+.badge{padding:2px 5px;border:1px solid #bbb;border-radius:10px;background:#fafafa}
+.badge.g{color:var(--green)} .badge.y{color:#806600}.badge.b{color:var(--blue)}.badge.r{color:var(--warn)}
+.nameList{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.presenceCol{border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.presenceHead{font-weight:700;background:#ecece8;padding:4px}
+.personItem{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:4px 5px;border-top:1px solid #eee;cursor:pointer}
+.personItem.checked{text-decoration:line-through;opacity:.55}
+.personItem.green{border-left:4px solid var(--green)}
+.personItem.yellow{border-left:4px solid var(--yellow)}
+.personItem.blue{border-left:4px solid var(--blue)}
+.personItem.red{border-left:4px solid var(--warn)}
+.settingsGrid{display:grid;grid-template-columns:1fr;gap:5px}
+.settingTable{width:100%;border-collapse:collapse}
+.settingTable th,.settingTable td{border:1px solid #d5d5d0;padding:2px}
+.settingTable input,.settingTable select{width:100%;min-width:0;height:24px;border:1px solid #aaa;padding:1px 3px}
+.settingTable .tiny{width:58px}
+.peopleTable .name{width:auto}
+.inline{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.inline input,.inline select{height:25px;border:1px solid #aaa;padding:1px 4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal.show{display:flex}
+.sheet{background:#fff;width:min(100%,640px);max-height:78vh;border-radius:8px 8px 0 0;overflow:auto;padding:7px}
+.sheetHead{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;padding-bottom:5px;border-bottom:1px solid #ddd}
+.quickPerson,.islandPerson{display:flex;justify-content:space-between;gap:6px;padding:6px 3px;border-bottom:1px solid #eee}
+.quickPerson button{width:100%;text-align:left;border:0;background:transparent;padding:0}
+.statusline{font-size:11px;color:#666}
+.dutyMask{display:grid;grid-template-columns:66px 1fr 1fr;gap:2px;align-items:center}
+.dutyMask button{height:24px;border:1px solid #aaa;background:#dff1df}
+.dutyMask button.on{background:#f3b9b9}
+textarea{width:100%;min-height:60px}
+@media(max-width:680px){
+  .guardGrid{grid-template-columns:1fr 1fr}
+  .nameList{grid-template-columns:1fr 1fr}
+  .wrap{padding:3px}
+  .card{padding:4px}
+  .row{grid-template-columns:56px 1fr 26px}
+}
+@media(max-width:430px){
+  body{font-size:12px}
+  .row input,.dutyRow input,.dutyRow select,.row button,.dutyRow button{height:24px}
+  .time{font-size:11px}
+}
+
+/* ===== Round 2 Dark Theme ===== */
+:root{--bg:#17191c;--panel:#22252a;--line:#444950;--text:#e7e9ec;--muted:#a8adb4;--warn:#ff6b6b;--pink:#ff75aa;--yellow:#ffd166;--blue:#65a9ff;--green:#70d68b}
+body{background:var(--bg);color:var(--text)}
+.topbar{background:#202328;border-color:var(--line)}
+.topbar button,.topbar input,.tabs button,.row input,.dutyRow input,.dutyRow select,.settingTable input,.settingTable select,.inline input,.inline select{background:#292d33;color:var(--text);border-color:#555b64}
+.tabs button.active{background:#383d45;color:#fff}.card,.sheet{background:var(--panel);border-color:var(--line)}
+.guardPoint,.presenceCol{border-color:var(--line)}.guardHead,.presenceHead{background:#2e3238}
+.row{border-color:#383c42}.time{color:#d4d7db}.small,.statusline{color:var(--muted)}
+.row button,.dutyRow button,.sheet button{background:#30343a;color:var(--text);border-color:#555b64}
+.settingTable th,.settingTable td{border-color:#444950}.personItem,.quickPerson,.islandPerson{border-color:#393d43}
+.sheetHead{background:var(--panel);border-color:#444950}.quickPerson button{background:transparent;border:0}
+.dutyMask button{background:#31513a;color:#e9f6ec;border-color:#53605a}.dutyMask button.on{background:#713b42;color:#ffe9eb}
+.field-alert-red{background:#692e33!important;color:#ffe3e5!important}.field-alert-pink{background:#653047!important;color:#ffdbe9!important}
+.field-alert-yellow{background:#655a2c!important;color:#fff0ad!important}.badge{background:#292d33;border-color:#555b64}
+.unknown-person{outline:1px solid #ff8a65!important}.subnav{display:flex;gap:3px;flex:1;min-width:100%}.subnav button{flex:1}
+.settingsPage{display:none}.settingsPage.active{display:block}
+.topbar button,.tabs button,.subnav button{font-size:14px;font-weight:650}
+.row input,.dutyRow input{font-size:15px;font-weight:600}
+.personItem>span:first-child{font-size:15px;font-weight:650}
+.presenceHead,.guardHead{font-size:14px}.row .time,.statusline{font-size:12px}#rollSummary{font-size:13px}
+.toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(8px);z-index:100;background:#49251f;color:#ffd9ce;border:1px solid #ff8a65;padding:7px 12px;border-radius:5px;font-size:14px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== Round 4 / CSS 美化 2.0 ===== */
+:root{--accent:#8ec5ff;--accent2:#ffd166;--soft:#d9e7f5;--panel2:#272c33}
+.topbar{background:linear-gradient(180deg,#222b35,#1d2228);border-bottom-color:#53616f;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.topbar>button{background:#303944;border-color:#5c6977;color:#eef5fb}.topbar #todayBtn{background:#304a3a;border-color:#60816a;color:#e6f8e9}.topbar #tomorrowBtn{background:#554a2c;border-color:#8a7642;color:#fff1bd}
+.subnav button{background:#28333f;border-color:#526273;color:#e7f1fb}.subnav button[data-setting-page="guardPage"]{color:#bcdcff}.subnav button[data-setting-page="dutyPage"]{color:#ffe09a}.subnav button[data-setting-page="peoplePage"]{color:#c9efcf}#exportSchedule,#importSchedule{color:#b9dcff}#exportSettings,#importSettings{color:#ffe3a3}
+.tabs button{background:#252b32;border-color:#4c5662;color:#cfd8e2}.tabs button.active{background:#35485b;border-color:#6b8eae;color:#fff}.sectionTitle{color:#f1d58d}.guardHead{background:#303c49;color:#d9ebff;border-bottom:1px solid #536779}.presenceHead{background:#343a43;color:#e7d79f}.badge.g{background:#213a2a}.badge.y{background:#433a20}.badge.b{background:#20364c}.badge.r{background:#47262a}.settingTable th{background:#303944;color:#e6d69f}.dutyMask .time{color:#f0d693;font-weight:700}
+.sourcePanel{padding:8px;border:1px solid #46515d;border-radius:8px;background:#20262d;margin-bottom:8px}.sourceStatus{margin-bottom:7px;color:#aebdca}.sourcePages{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px}.sourcePages label{display:flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid #4d5965;border-radius:6px;background:#292f37}.sourcePages input{width:auto;height:auto}.peopleSection{margin-top:9px}.peopleSection h3{display:flex;justify-content:space-between;align-items:center;margin:0;padding:7px 9px;background:#29333d;color:#f1d58d;font-size:14px}.officialPerson{background:#20262c}.personMeta{font-size:11px;color:#a9bac9}.peopleTable .flagCell{width:54px;text-align:center}.peopleTable .flagCell input{width:18px}.peopleTable .deleteCell{width:48px}.peopleTable .readonlyCell{padding:5px 6px}.syncActions{display:flex;gap:6px;align-items:center}.syncActions button{white-space:nowrap}
+#toast.toast{top:10px;bottom:auto;transform:translateX(-50%) translateY(-8px);z-index:2147483645}#toast.toast.show{transform:translateX(-50%) translateY(0)}
+.dutyRestLine{display:flex;align-items:center;gap:4px;margin:5px 0 7px;color:#d8e1ea}.dutyRestLine select{height:26px;background:#292d33;color:#e7e9ec;border:1px solid #555b64;border-radius:3px}
+
+/* ===== 使用說明 ===== */
+.helpBtn{margin-left:auto!important;color:#fff0b8!important;border-color:#8a7642!important;background:#4a4129!important}
+.helpSheet{max-height:88vh;padding:0}
+.helpSheet .sheetHead{padding:8px 10px;z-index:2}
+.helpContent{padding:8px 11px 18px;font-size:13px;line-height:1.65;color:#dfe5eb}
+.helpContent h2{margin:2px 0 8px;font-size:18px;color:#fff0b8}
+.helpContent h3{margin:15px 0 4px;font-size:15px;color:#9fd0ff;border-bottom:1px solid #3d4854;padding-bottom:2px}
+.helpContent p{margin:5px 0}
+.helpContent ul{margin:5px 0 7px;padding-left:20px}
+.helpContent li{margin:2px 0}
+.helpContent strong{color:#ffe09a}
+
+/* ===== 3.01 人力管制：手機優先，僅時間軸可橫向滑動 ===== */
+.tabs{overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs button{min-width:74px;white-space:nowrap}
+.controlStack{display:grid;gap:6px}.controlZone{border:1px solid #46515d;border-radius:7px;background:#20262d;padding:6px}.controlZoneHead{display:flex;justify-content:space-between;align-items:center;gap:5px;color:#f1d58d;font-weight:700}.controlZones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.controlChips{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.controlChip{min-height:28px;border:1px solid #596675;border-radius:14px;background:#303944;color:#edf2f7;padding:3px 8px}.manpowerStats{display:flex;gap:4px;flex-wrap:wrap}.manpowerToolbar{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.timelineViewport{overflow-x:auto;overflow-y:auto;max-height:68vh;border:1px solid #46515d;border-radius:5px;overscroll-behavior-x:contain}.timelineRow{display:grid;min-width:max-content;border-bottom:1px solid #37414c}.timelineName{position:sticky;left:0;z-index:2;width:132px;padding:5px;background:#252d35;border-right:1px solid #46515d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.timelineCell{width:38px;height:29px;padding:0;border:0;border-right:1px solid #3a4550;border-radius:0;font-size:9px}.timelineHead{position:sticky;top:0;z-index:4;background:#1e252c}.timelineHead .timelineName{z-index:5}.state-green{background:#24472d!important}.state-yellow{background:#5c4c20!important}.state-callable{background:repeating-linear-gradient(135deg,#725a1c,#725a1c 5px,#4d3e1b 5px,#4d3e1b 10px)!important}.state-blue{background:#244b70!important}.state-red{background:#652f35!important}.state-duty{background:#543b70!important}.zonePickerGroup{border:1px solid #46515d;border-radius:6px;margin:6px 0}.zonePickerGroup h4{margin:0;padding:6px;background:#2c3540}.zonePickerList{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:5px}.zonePickerList label{padding:5px;background:#29313a;border-radius:4px}.peopleDisplayOptions{margin-bottom:6px}.peopleTable .compactFlag{width:52px;text-align:center}.peopleTable .compactFlag input{width:18px}.specialYellow{color:#ffe18a}.categoryStat{font-size:11px;color:#b8c5d0}.outsideGroup{margin-bottom:7px}.outsideReason{color:#ffaaa2;font-size:11px}.paintTools{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}.paintTools button.on{outline:2px solid #fff}.paintGrid{display:grid;grid-template-columns:58px repeat(6,minmax(26px,1fr));gap:2px;touch-action:none;user-select:none}.paintLabel{font-size:10px;color:#c4ced8;padding:5px 2px}.paintCell{height:27px;padding:0;border-radius:2px}.paintCell.green{background:#2f6c3c}.paintCell.red{background:#73363c}.paintCell.yellow{background:#756124}.paintCell.blue{background:#2c5f8d}.paintCell.clear{background:#303840}.paintViewport{overflow-x:auto}
+@media(max-width:680px){.controlZones{grid-template-columns:1fr 1fr}.zonePickerList{grid-template-columns:1fr 1fr}.timelineName{width:112px}.timelineCell{width:36px}.peopleTable{min-width:0}.peopleTable th,.peopleTable td{font-size:11px}.peopleTable [data-col="business"],.peopleTable [data-col="note"]{display:none}.sourcePanel{overflow-wrap:anywhere}}
+@media(max-width:430px){.controlZones{grid-template-columns:1fr}.zonePickerList{grid-template-columns:1fr 1fr}.tabs button{font-size:12px;min-width:68px}.subnav{flex-wrap:nowrap}.subnav button{min-width:58px;flex:0 0 auto}}
+
+.paintGrid{grid-template-columns:48px repeat(6,minmax(43px,1fr));touch-action:pan-y}.paintCell{font-size:8px;line-height:1}.availabilityBoard{display:flex;align-items:flex-start;min-width:max-content}.availabilityColumn{width:88px;flex:0 0 88px;border-right:1px solid #46515d;min-height:120px}.availabilityTime{position:sticky;top:0;background:#303944;color:#f3d88f;padding:4px 2px;text-align:center;font-weight:700;line-height:1.2}.availabilityTime span,.availabilityTime strong{display:block}.availabilityName{display:block;width:100%;min-height:25px;padding:3px 4px;border:0;border-bottom:1px solid #39434e;border-radius:0;text-align:left;background:#24472d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.availabilityEmpty{padding:8px 2px;color:#87929d;text-align:center}
+
+/* ===== 3.03 人物方塊、系統選單與新版人力狀態 ===== */
+.systemMenuActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding-top:8px}.systemMenuActions button{min-height:42px}
+.dutyControls{justify-content:space-between}.dutyPersonChip{width:6.6em;max-width:6.6em;height:26px!important;padding:2px 4px!important;border-radius:5px!important;overflow:hidden;text-overflow:ellipsis;text-align:center}.controlChips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.controlChip{width:100%;min-width:0;min-height:30px;border:1px solid #596675;border-radius:5px;background:#303944;color:#edf2f7;padding:3px 2px;display:grid;grid-template-columns:minmax(0,2.25em) minmax(0,3.25em);align-items:center;justify-content:center;column-gap:2px;text-align:center;overflow:hidden}.controlChip .rankPart,.controlChip .namePart{display:block;white-space:nowrap;overflow:hidden;text-overflow:clip}.controlChip .rankPart.longText,.controlChip .namePart.longText{font-size:10px;letter-spacing:-.5px}.controlChip .rankPart.veryLongText{font-size:8px;letter-spacing:-1px}.controlChip.nameOnly,.controlChip.plainChip{display:block;padding:5px 3px;width:auto}.controlChip.standbyChip{background:#50376d;border-color:#916bc1;color:#f3e9ff}
+.zonePickerList{grid-template-columns:repeat(2,minmax(0,1fr))}.zonePickerList label,.dutyPickerPerson{min-width:0}.dutyPickerPerson.isAbsent{background:#20242a;color:#777f89;opacity:.62}.dutyPickerPerson.isStandby{box-shadow:inset 4px 0 #a66bea}.pickerReason{display:block;color:#d5a7ff;font-size:10px}
+.state-green{background:#24472d!important}.state-yellow{background:#5c4c20!important}.state-callable{background:repeating-linear-gradient(135deg,#80671f,#80671f 4px,#4b3d19 4px,#4b3d19 8px)!important}.state-blue{background:#244b70!important}.state-guard{background:#8b3038!important}.state-duty{background:#dc4b55!important}.state-absent{background:#08090b!important}.state-standby{background:#50376d!important}.state-sleep{background:#4a4d52!important}
+.timelineName{width:68px;font-size:10px;padding:4px 3px}.timelineCell{width:22px;height:27px;font-size:9px}.timelineDateCell{height:20px;padding:2px;border-right:1px solid #3a4550;text-align:left;color:#f1d58d;font-size:9px;overflow:hidden}.timelineTimeCell{height:20px;padding:2px 0;text-align:center;color:#bfcbd6;font-size:9px}.timelineDateRow{top:0}.timelineTimeRow{top:20px}.timelineAbsent .timelineName{background:#111318;color:#8f969e}.timelineLegend{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0;font-size:10px}.timelineLegend span{padding:2px 5px;border-radius:3px}
+.peopleTable .personNameCell{font-weight:700;white-space:nowrap}.peopleTable .rankCell{white-space:nowrap}.peopleTable [data-col="business"],.peopleTable [data-col="note"]{display:table-cell}
+@media(max-width:680px){.peopleTable [data-col].columnHidden{display:none!important}.controlZones{grid-template-columns:1fr}.controlChips{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:360px){.controlChip{font-size:10px}}
+
+/* ===== 3.04 個別衝突與四區點名 ===== */
+.dutyPeople{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}.dutyPersonChip{width:100%;max-width:none;min-width:0}.dutyAddPerson{width:100%;min-width:0}.person-alert-yellow{background:#756124!important;color:#fff1af!important;border-color:#b89b43!important}.person-alert-blue{background:#244b70!important;color:#dceeff!important;border-color:#5d91c5!important}.person-alert-callable{background:repeating-linear-gradient(135deg,#80671f,#80671f 4px,#4b3d19 4px,#4b3d19 8px)!important;color:#fff1af!important;border-color:#b89b43!important}.person-alert-standby{background:#50376d!important;color:#f3e9ff!important;border-color:#916bc1!important}.person-alert-guard{background:#8b3038!important;color:#ffe8e9!important;border-color:#c9656e!important}.person-alert-duty{background:#dc4b55!important;color:#fff!important;border-color:#ff9299!important}.person-alert-absent{background:#08090b!important;color:#b7bdc5!important;border-color:#555b64!important}
+.sheetHeadActions{display:flex;gap:6px;align-items:center}.sheetHeadActions button{min-height:38px;padding:5px 12px;font-weight:700}.sheetHeadActions [hidden]{display:none}
+.rollcallScroller{overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding-bottom:5px}.rollcallBoard{display:flex;align-items:flex-start;gap:6px;min-width:max-content}.rollSection{width:min(82vw,310px);flex:0 0 min(82vw,310px);border:1px solid var(--line);border-radius:5px;overflow:hidden;scroll-snap-align:start;background:#1d2126}.rollSectionHead{padding:6px;background:#303840;color:#f1d58d;font-weight:700}.rollSectionHead small{display:block;margin-top:2px;color:#b8c5d0;font-weight:500;line-height:1.4}.rollGroupTitle{padding:4px 6px;background:#272e35;color:#cbd5df;font-size:11px;border-top:1px solid #3b454f}.rollPerson{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:31px;padding:4px 6px;border-top:1px solid #343b43}.rollPerson.checked{text-decoration:line-through;opacity:.55}.rollPerson .statusline{margin-left:auto;text-align:right}.rollPerson.state-green{border-left:4px solid var(--green)}.rollPerson.state-yellow{border-left:4px solid var(--yellow)}.rollPerson.state-blue{border-left:4px solid var(--blue)}.rollPerson.state-standby{border-left:4px solid #a66bea}.rollPerson.state-guard{border-left:4px solid #d9636c}.rollPerson.state-duty{border-left:4px solid #ff7a83}.rollPerson.state-callable{border-left:4px solid #d2ad3f}.rollPerson.state-absent{border-left:4px solid #5d6269}.rollEmpty{padding:10px;color:#7f8994;text-align:center}
+
+/* ===== 3.05 手機雙欄點名、上下式勤務與統計整列 ===== */
+.dutyRow{grid-template-columns:minmax(0,1fr) 30px;grid-template-areas:"content clear" "people people"}.dutyContent{grid-area:content}.dutyPeople{grid-area:people}.dutyRow>.danger{grid-area:clear}.manpowerStats{display:grid;grid-template-columns:1fr;gap:4px}.manpowerStats .badge{display:block;width:100%;border-radius:5px;padding:5px 7px}
+.sheetHead{z-index:80}.sheetHeadActions{position:relative;z-index:81}.zonePickerGroup h4{position:relative;z-index:1}.rollSection{width:min(47vw,270px);flex:0 0 min(47vw,270px)}.rollStatsLines{display:grid;gap:2px;margin-top:4px}.rollStatsLines div{padding-top:2px;border-top:1px solid #49525c;color:#c1cbd5;font-size:10px;line-height:1.35}.rollSubLayer{padding-left:9px;color:#aeb9c4!important}.timelineTimeCell.halfHour{padding-top:7px;background:#192027;color:#778594;font-size:8px}.timelineTimeCell.fullHour{padding-top:2px;color:#d3dce5}.zonePickerApplyTop{min-height:38px;padding:5px 12px;font-weight:700}
+@media(max-width:360px){.rollSection{width:46.5vw;flex-basis:46.5vw}.rollPerson{padding-left:4px;padding-right:4px}}
+#opsLock{position:fixed;inset:0;z-index:2147483645;background:#080f19ed;display:grid;place-items:center;padding:20px}#opsLock[hidden]{display:none}#opsLock>div{max-width:460px;padding:24px;border:1px solid #506480;border-radius:14px;background:#101b2a;color:#eef5ff;font:16px/1.7 system-ui}#opsLock button{padding:12px;background:#164d5b;color:white;border:1px solid #518b8b;border-radius:8px}.systemDuty{margin-block:8px}.systemGroup{padding:8px}.mealSlot{display:flex;gap:6px;align-items:center;padding:8px}.mealSlot select{min-width:0;flex:1}.sysPick{display:flex;gap:8px;padding:10px;border-bottom:1px solid #324457}.sysPick small{margin-left:auto}.systemDuty .controlChips{margin-top:8px}.systemDuty select{max-width:100%}
+.state-overnight,.person-alert-overnight{background:#ad3543!important;color:#fff!important}.controlZones:has(.systemDuty){grid-template-columns:1fr}.systemDuty .controlChips>button{min-height:32px}#systemPeopleBody{max-height:65vh;overflow:auto}
+
+.systemDutyGrid{display:grid;gap:4px;margin:4px 0 6px}
+.systemDuty.dutyRow{display:block;margin:0;padding:4px;min-height:0;border-radius:5px;background:#252b32}
+.systemDutyHead{display:flex;align-items:center;gap:4px;min-height:27px}
+.systemDutyName{flex:1;min-width:0;font-size:14px;line-height:25px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;color:#ead293}
+.systemNumber{display:inline-block;min-width:23px;color:#7ac7d4;font-size:12px}
+.systemDutyHead button,.mealSlot button{height:26px;min-height:26px;border:1px solid #5a616d;background:#30343a;color:#eef2f5;border-radius:4px;padding:1px 4px;white-space:nowrap}
+.systemDutyHead .systemTime{flex:0 0 48px;width:48px}
+.systemDutyHead .systemAdd{font-size:20px;line-height:20px;padding:0}
+.systemDutyHead .systemAdd{flex:0 0 32px;width:32px}
+.systemDutyHead .systemAddExtra{margin-left:auto;font-size:12px}
+.systemHandover{display:flex;align-items:center;white-space:nowrap;gap:2px;font-size:11px;color:#e4d2a3;min-width:0}
+.systemHandover input{width:17px;height:17px;margin:0;accent-color:#90d5dc}
+.systemPeopleGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;margin-top:3px}
+.systemPeopleGrid:empty{display:none}
+.systemPersonChip{display:block;min-width:0;width:100%;height:25px;padding:0 3px;border:1px solid #626d79;border-radius:4px;background:#34404b;color:#f0f2f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;font-size:12px}
+.systemDutyHead:not(:first-child){margin-top:4px;padding-top:4px;border-top:1px solid #404a55}
+.systemDuty .mealSlot{display:grid;grid-template-columns:22px minmax(0,1fr) 48px;gap:4px;align-items:center;padding:3px 0 0;min-height:29px}
+.systemDuty .mealSlot>span{font-size:12px;color:#d7dcdd;text-align:center}
+.systemDuty .mealSlot select{min-width:0;width:100%;height:26px;padding:0 2px;font-size:12px}
+.systemDuty .mealExtra{grid-template-columns:minmax(0,1fr) 55px 30px;padding-top:3px}
+.systemDuty .mealExtra .mealPeriod{width:55px}
+.dutyControls{margin-top:7px}
+
+.zonePickerList{grid-template-columns:repeat(2,minmax(0,1fr))}.zonePickerList .quickPerson{display:flex;align-items:center;justify-content:space-between;min-width:0;gap:3px;padding:5px;font-size:11px;line-height:1.3}.zonePickerList .quickPerson>span{min-width:0;overflow:hidden}.zonePickerList .quickPerson .statusline{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}.zonePickerList .quickPerson input[type="checkbox"]{flex:0 0 auto}.zonePickerList .quickPerson button{width:100%;min-width:0;padding:4px;text-align:left}
+ .lineImportWarning{padding:8px;background:#58421d;color:#ffe4a8;border:1px solid #b98c42;border-radius:5px}.aliasGrid{max-height:65vh;overflow:auto}.aliasGrid .quickPerson{display:flex;justify-content:space-between;gap:8px;margin:4px 0}.aliasGrid input{width:105px}.linePreviewRow{display:flex;align-items:center;gap:4px;padding:4px 0;border-bottom:1px solid #445;flex-wrap:wrap}.linePreviewRow span{flex:1;min-width:115px}.linePreviewRow select{min-width:105px;max-width:48%;flex:1}#lineImportPreview{max-height:55vh;overflow:auto;margin:8px 0}#lineImportModal .sheet,#dutyAliasModal .sheet{max-height:96vh;overflow:auto}
+#lineImportModal .sheet{background:var(--panel);color:var(--text);width:min(100%,800px);max-height:92vh}#lineImportText{display:block;width:100%;box-sizing:border-box;min-height:90px;height:min(28vh,210px);padding:8px;background:#161d26;color:#f0f3f7;border:1px solid var(--line);border-radius:5px;resize:vertical}#lineImportText::placeholder{color:#95a6b7}#lineImportModal .linePreviewRow{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.95fr) minmax(0,1.15fr) 52px;gap:3px;align-items:center;padding:3px 0;flex-wrap:nowrap}#lineImportModal .linePreviewRow>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}#lineImportModal .linePreviewRow>select{box-sizing:border-box;min-width:0;max-width:none;width:100%;height:30px;background:#2b3540;color:#eaf1f6;border:1px solid #526171;border-radius:4px;font-size:11px;padding:1px}#lineImportModal .linePreviewRow>button{box-sizing:border-box;min-width:0;width:52px;padding:3px 0;font-size:10px;white-space:nowrap}#lineImportModal .linePreviewRow select:has(option:first-child:checked){border-color:#d8ac48;color:#ffe3a2}.rollSection[hidden]{display:none}
+.field-alert-guard{background:#6b3036!important;color:#ffe8ea!important}.field-alert-duty{background:#b8464b!important;color:#fff!important}.field-alert-watch,.person-alert-watch{background:#9447b7!important;color:#fff!important}.field-alert-standby{background:#573477!important;color:#fff!important}.field-alert-blue{background:#28517b!important;color:#fff!important}.field-alert-callable{background:#996322!important;color:#fff2da!important}.field-alert-absent{background:#30343b!important;color:#fff!important}
+#dutyAnnualModal{align-items:stretch;z-index:70}#dutyAnnualModal .sheet{width:100vw;max-width:none;max-height:100dvh;height:100dvh;border-radius:0;padding:0;display:flex;flex-direction:column;background:#19212a;color:#e8eef5}#dutyAnnualModal .sheetHead{flex:0 0 auto;padding:8px;background:#243140}#dutyAnnualModal .sheetHead small{font-size:11px;color:#aebdcb}#dutyAnnualModal .dutyAnnualControls{flex:0 0 auto;padding:5px 7px;background:#202b37;border-bottom:1px solid #405064;display:flex;flex-wrap:wrap;align-items:center;gap:4px}#dutyAnnualModal .dutyAnnualControls label{display:flex;align-items:center;gap:2px;font-size:11px;white-space:nowrap}#dutyAnnualYear{width:61px}#dutyAnnualScope{width:80px}#dutyAnnualSize{width:66px}#dutyAnnualModal .dutyAnnualControls input,#dutyAnnualModal .dutyAnnualControls select{height:29px;background:#16212d;color:#e8eef5;border:1px solid #506479;border-radius:5px;padding:2px}#dutyAnnualModal .dutyAnnualLegend{display:flex;gap:3px;overflow-x:auto;width:100%;white-space:nowrap}#dutyAnnualModal .dutyAnnualLegend span{padding:2px 5px;border-radius:3px;font-size:10px}#dutyAnnualModal .dutyAnnualLegend .guard,.dutyAnnualTag.guard{background:#315477;color:#e4f4ff}#dutyAnnualModal .dutyAnnualLegend .hard,.dutyAnnualTag.hard{background:#8b5133;color:#fff0de}#dutyAnnualModal .dutyAnnualLegend .agent,.dutyAnnualTag.agent{background:#7d6a35;color:#fff6da}#dutyAnnualModal .dutyAnnualLegend .watch,.dutyAnnualTag.watch{background:#714c8d;color:#f5eaff}#dutyAnnualModal .dutyAnnualLegend .island{background:#315f45;color:#e5ffe9}#dutyAnnualModal .dutyAnnualLegend .away{background:#070b0e;color:#d2dbe3}.dutyAnnualMonths{display:flex;gap:2px;width:100%;overflow-x:auto}.dutyAnnualMonths button{min-width:32px;height:27px;padding:2px 5px}.dutyAnnualCanvas{overflow:auto;flex:1;overscroll-behavior:contain;--year-w:46px;--year-h:31px;--year-name:74px;--year-font:10px}#dutyAnnualModal[data-size="1"] .dutyAnnualCanvas{--year-w:30px;--year-h:23px;--year-name:57px;--year-font:7px}#dutyAnnualModal[data-size="2"] .dutyAnnualCanvas{--year-w:38px;--year-h:27px;--year-name:64px;--year-font:8px}#dutyAnnualModal[data-size="3"] .dutyAnnualCanvas{--year-w:46px;--year-h:31px;--year-name:74px;--year-font:10px}#dutyAnnualModal[data-size="4"] .dutyAnnualCanvas{--year-w:62px;--year-h:43px;--year-name:88px;--year-font:13px}.dutyAnnualTable{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content;font-size:var(--year-font)}.dutyAnnualTable th,.dutyAnnualTable td{box-sizing:border-box;width:var(--year-w);min-width:var(--year-w);max-width:var(--year-w);height:var(--year-h);padding:0;border-right:1px solid #435162;border-bottom:1px solid #435162;text-align:center}.dutyAnnualTable thead th{position:sticky;top:0;z-index:2;background:#2a3c50;color:#eaf2ff}.dutyAnnualTable .annualName{position:sticky;left:0;z-index:3;width:var(--year-name);min-width:var(--year-name);max-width:var(--year-name);padding:0 2px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#2a3c50}.dutyAnnualTable thead .annualName{z-index:4}.dutyAnnualTable td.stay{background:#3c4652}.dutyAnnualTable td.island{background:#315f45}.dutyAnnualTable td.away{background:#080c11}.dutyAnnualTable td button{width:100%;height:100%;padding:1px;border:0;background:transparent;color:#eaf2ff;display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:1px;overflow:hidden;font-size:var(--year-font);line-height:1.05}.dutyAnnualTag{display:block;white-space:nowrap;text-overflow:clip;overflow:hidden;border-radius:2px;padding:1px 0}.dutyAnnualMore{font-size:var(--year-font);line-height:1}#dutyAnnualDetail{z-index:85}#dutyAnnualDetail .sheet{background:#202a35;color:#eff5ff}#dutyAnnualDetailBody{display:grid;gap:5px;padding:7px}#dutyAnnualDetailBody div{padding:7px;background:#2c3b4b;border-radius:5px}
+</style>
+
+<div id="helpModal" class="modal">
+  <div class="sheet helpSheet">
+    <div class="sheetHead"><strong>值星勤務輔助工具 使用說明</strong><button data-close="helpModal">關閉</button></div>
+    <div class="helpContent">
+      <p>本工具用於協助值星人員進行衛哨安排、勤務分配及人員點名掌握。系統會依照設定的勤務時間、人員狀態及歷史排班資料提供提示，協助降低勤務衝突、間隔不足或重複安排等情況。</p>
+
+      <h3>一、日期與班表</h3>
+      <p>班表依日期分別保存，可使用日期切換功能查看或編輯不同日期的勤務資料。「今日」可快速返回當日班表，主要用於查看當日勤務及進行點名；「明日」則可快速切換至次日，方便提前安排下一日勤務。</p>
+
+      <h3>二、衛哨安排</h3>
+      <p>衛哨區依照「哨點設定」自動產生班次，每一哨點可設定不同的執勤時段、哨別及補休方式。排班時可直接輸入人名，或使用人名旁的快速選擇功能進行安排。</p>
+      <p>快速選擇清單會參考近期排班紀錄，將較久未執行該班衛哨的人員優先排列，供值星人員進行勤務平均分配時參考。當日正在編輯的班表不會納入排序計算。</p>
+
+      <h3>三、勤務分配</h3>
+      <p>勤務區用於安排衛哨以外的各類勤務。各項勤務的名稱、執勤時段及補休方式可事先於「勤務設定」中建立，排班時只需選擇勤務項目並指定人員。</p>
+      <p>同一勤務可包含多個不同時段，例如三餐飯菜車等分段勤務。系統會依實際設定的時間進行勤務衝突判斷。</p>
+
+      <h3>四、排班提示</h3>
+      <p>系統會依目前班表及前一日資料自動檢查部分常見排班問題。提示僅作為值星人員排班參考，不會禁止輸入或自動修改班表。</p>
+      <ul>
+        <li><strong>紅色：</strong>勤務時間衝突、島休期間安排勤務，或連續三日安排艱苦哨等情況。</li>
+        <li><strong>粉色：</strong>前後衛哨間隔未滿 6 小時。</li>
+        <li><strong>黃色：</strong>同一哨點與前一日安排相同班次。</li>
+      </ul>
+      <p>衛哨間隔判斷會跨哨點計算；同班哨提示則僅比較相同哨點。</p>
+
+      <h3>五、島休</h3>
+      <p>「島休」用於標記當日島休人員。被設定為島休的人員，全島自當日08:00（提早假06:00）至次日07:40限制調度；上半島07:40至14:00，下半島14:00至次日07:40。外宿另行登記，18:00至次日06:00為紅色，06:00至07:40為黃色。勤務優先顯示；若班表中出現相關安排，系統會以衝突提示標示。</p>
+
+      <h3>六、點名</h3>
+      <p>點名功能會依指定時間，自動整理目前應在及不應在人員。可使用「現在」重新取得目前系統時間，也可手動輸入四位數 24 小時制時間，例如「0830」或「2130」後重新計算。</p>
+      <ul>
+        <li><strong>綠色：</strong>依目前資料判斷應在人員。</li>
+        <li><strong>黃色：</strong>應已返回，但距離返回時間未超過 15 分鐘。</li>
+        <li><strong>藍色：</strong>即將離開，距離勤務或衛哨開始時間未超過 15 分鐘。</li>
+        <li><strong>紅色：</strong>依衛哨、勤務、補休或島休等資料判斷目前不應在人員。</li>
+      </ul>
+      <p>點擊人名可作為實際點名時的臨時勾記使用。點名勾記不屬於正式勤務資料，重新計算點名後會自動清除。</p>
+
+      <h3>七、人員清冊</h3>
+      <p>「人員」設定分為由312同步的正式清單，以及本工具自行建立的臨時人員。正式清單會取得姓名、軍階、業務與所屬Page；臨時人員適合短期支援或尚未納入正式清冊者。</p>
+      <ul>
+        <li><strong>免排：</strong>不顯示於快速排班人員清單，但仍會正常參與點名。</li>
+        <li><strong>忽略：</strong>不納入一般快速排班及點名。</li>
+      </ul>
+      <p>排班欄位仍允許直接輸入清冊以外的人員，以因應臨時支援等情況。非清冊人員不會加入後續的快速選擇清單。</p>
+
+      <h3>八、哨點與補休設定</h3>
+      <p>「哨點」設定可建立各哨點的班次結構。每一班可設定開始時間、結束時間、哨別及補休時段。哨別分為日哨、夜哨及艱苦哨，供系統進行排班提示判斷。</p>
+      <p>衛哨時間支援跨日前的負數時間設定，以配合前一日晚間即開始計算次日勤務的班表模式。實際保存班表時，系統會依日期換算為實際執勤時間。</p>
+      <p>補休時段可設定「夜哨」及自訂時段。補休期間會納入點名及勤務衝突判斷。</p>
+
+      <h3>九、資料管理</h3>
+      <p>整套資料可在本頁系統選單匯出及載入；分區交換請至 310 主控台。勤務文字匯出仍保留於本頁。</p>
+      
+
+      <h3>十、使用注意事項</h3>
+      <p>本工具的排班提示及點名結果均依目前輸入的設定與資料計算，用途為協助值星人員快速整理資訊及發現可能的勤務衝突。實際勤務安排仍應依單位現行規定及實際人員狀況確認。</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.state-callable,.person-alert-callable{background:repeating-linear-gradient(135deg,#176a70,#176a70 4px,#10464b 4px,#10464b 8px)!important;color:#e4ffff!important;border-color:#58bac2!important}
+.state-callable,.person-alert-callable{background:#70451f!important;color:#f5dfc8!important;border-color:#9b6735!important}
+.state-watch,.timelineCell[title*="值星"],.controlChip.watchChip{background:#8e6bb8!important;color:#fff!important;border-color:#bca0dc!important}
+.settingTable [data-guard-rest]{width:100%;min-height:26px}
+.quickPerson button:disabled{color:#777f89;cursor:not-allowed}
+body button{appearance:none;-webkit-appearance:none;border:1px solid #56616d;background:#303740;color:#e8edf2;border-radius:4px;box-shadow:none}
+body button:active{filter:brightness(1.16)}
+.quickPerson button{background:transparent;border:0;border-radius:0}
+.time.field-alert-red,.time.field-alert-pink,.time.field-alert-yellow{display:block;padding:4px 2px;border-radius:3px;text-align:center}
+.textExportList{display:grid;gap:4px;padding:7px 0}.textExportLine{display:flex;align-items:flex-start;gap:7px;padding:7px;border:1px solid #46515d;border-radius:5px;background:#252c33}.textExportLine input{flex:0 0 auto;width:18px;height:18px;margin:0}.textExportLine span{white-space:pre-wrap;overflow-wrap:anywhere}.textExportGroupStart{margin-top:7px;border-top-color:#758493}.textExportActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.textExportActions button{min-height:38px;padding:5px 12px}.textExportEditor{min-height:52vh;margin-top:8px;padding:9px;background:#171c22;color:#eef2f6;border:1px solid #55616e;border-radius:5px;font:14px/1.55 ui-monospace,"Noto Sans TC",sans-serif;resize:vertical}#openTextExport{flex:0 0 auto;margin-left:auto;white-space:nowrap;background:#3b4856;color:#fff0bd;border-color:#68798b}
+</style>
+<script>
+(function(){'use strict';const plugins=[['jszip.min.js','JSZip'],['shion-users.js','ShionUsers'],['shion-schema.js','ShionSchema'],['shion-data.js','ShionData']];function load(p){const paths=['./【崩界櫻雪】Assets/Plugin/WorkBase/'+({"shion-users.js":"core/shion-users.js","shion-schema.js":"core/shion-schema.js","shion-data.js":"core/shion-data.js","planner-mobile.js":"planner/planner-mobile.js","planner-cover.js":"planner/planner-cover.js","planner-export.js":"planner/planner-export.js","planner-patch.js":"planner/planner-patch.js","personnel-excel.js":"personnel/personnel-excel.js","jszip.min.js":"vendor/jszip.min.js"})[p[0]]];return new Promise((resolve,reject)=>{let i=0;function attempt(){if(i===paths.length){reject(Error('缺少插件 '+p[0]));return;}const s=document.createElement('script');s.src=paths[i++]+'?v=20261017-backup2';s.onload=()=>window[p[1]]?resolve():attempt();s.onerror=attempt;document.head.append(s)}attempt()})}window.ShionPluginsReady=plugins.reduce((q,p)=>q.then(()=>load(p)),Promise.resolve());window.ShionPluginsReady.catch(e=>{const show=()=>{const box=document.createElement('p');box.textContent=e.message;document.body.append(box)};document.readyState==='loading'?document.addEventListener('DOMContentLoaded',show):show();});}());
+</script>
+</head>
+<body><div id="opsStatus" role="status" style="padding:6px 12px;color:#93c9ba;font:12px system-ui">正在載入共用資料…</div><div id="opsLock"><div><h2>🔒 工具暫停</h2><p>正在開啟共用資料…</p><button id="opsResume">重新載入最新資料並接手</button></div></div>
+
+<div class="topbar">
+  <div class="dateNav">
+    <button id="prevDay">◀</button>
+    <input id="datePick" type="date">
+    <button id="nextDay">▶</button>
+    <button id="todayBtn">今日</button>
+    <button id="tomorrowBtn">明日</button>
+    <button id="systemMenuBtn">系統</button>
+  </div>
+  <div class="subnav">
+    <button data-setting-page="guardPage">哨點</button>
+    <button data-setting-page="dutyPage">勤務</button>
+    <button data-setting-page="peoplePage">人員</button>
+    <button id="openLineImport" type="button">反向植入數據</button>
+    <button id="openTextExport" type="button">文字匯出</button><button id="openDutyAnnual" type="button">年度哨勤</button>
+  </div>
+  <div class="tabs">
+    <button data-tab="schedule" class="active">排班</button>
+    <button data-tab="rollcall">點名</button>
+    <button data-tab="personTimelinePage">人員視圖</button>
+    <button data-tab="manpowerTimelinePage">人力視圖</button>
+    <button data-tab="outsidePage">外散</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="schedule" class="panel active">
+    <div class="card">
+      <div class="sectionTitle"><span>衛哨</span><span id="scheduleHint" class="small"></span></div>
+      <div id="guardGrid" class="guardGrid"></div>
+    </div>
+    <div class="card">
+      <div class="sectionTitle"><span>勤務分配</span><span class="inline"><button id="carryYesterdayDuty" type="button">帶入昨日勤務</button><button id="carryRoutineDuty" type="button">常態帶入</button></span></div>
+      <div id="systemDutyGrid" class="systemDutyGrid"></div>
+      <div class="dutyControls"><label>自訂勤務數量 <select id="dutyCount"></select></label></div>
+      <div id="dutyGrid" class="dutyGrid"></div>
+    </div>
+    <div class="card"><div class="sectionTitle"><span>當日人力概況</span><span id="manpowerDateLabel" class="small"></span></div><div id="manpowerSummary" class="manpowerStats"></div></div>
+    <div class="card"><div class="sectionTitle"><span>後三日休收人員</span><span id="futureLeaveStamp" class="small"></span></div><div id="futureLeaveList"></div></div>
+    <div class="card"><div class="sectionTitle"><span>島休區</span><span class="small">上半島／下半島／全島／外宿</span></div><div id="islandControl" class="controlZones"></div></div>
+    <div class="card"><div class="sectionTitle"><span>休假區</span><span class="small">依 313 正式紀錄顯示</span></div><div id="leaveControl" class="controlZones"></div></div>
+  </section>
+
+  <section id="personTimelinePage" class="panel"><div class="card"><div class="sectionTitle"><span>人員視圖</span></div><div class="manpowerToolbar"><button data-grain="30">30分</button><button data-grain="60" class="active">1小時</button><select id="timelineSpan"><option value="24">今日24小時</option><option value="48" selected>今日至明日24時</option></select></div><div class="timelineLegend"><span class="state-green">閒置</span><span class="state-yellow">不建議</span><span class="state-blue">補休</span><span class="state-standby">待命班</span><span class="state-guard">衛哨</span><span class="state-duty">勤務</span><span class="state-callable">限制調度</span><span class="state-absent">不在</span><span class="state-sleep">睡眠底色</span></div><div id="personTimeline" class="timelineViewport"></div></div></section>
+  <section id="manpowerTimelinePage" class="panel"><div class="card"><div class="sectionTitle"><span>人力視圖</span><span class="small">點數字查看人名</span></div><div id="manpowerTimeline" class="timelineViewport"></div></div></section>
+  <section id="outsidePage" class="panel"><div id="outsideResult"></div></section>
+
+  <section id="rollcall" class="panel">
+    <div class="card">
+      <div class="sectionTitle">
+        <span>點名</span>
+        <span class="inline">
+          <label>時間 <input id="rollTime" type="text" inputmode="numeric" maxlength="4" placeholder="HHMM"></label>
+          <button id="rollNow">現在</button><button id="refreshRoll">重算</button>
+        </span>
+      </div>
+      <div id="rollSummary" class="summary"></div>
+      <div class="rollcallScroller" style="margin-top:5px"><div class="rollcallBoard">
+        <div class="rollSection"><div id="rollStayHead" class="rollSectionHead">留守區</div><div id="rollStay"></div></div>
+        <div class="rollSection"><div id="rollIncidentHead" class="rollSectionHead">事故區</div><div id="rollIncident"></div></div>
+        <div class="rollSection" hidden><div id="rollIslandHead" class="rollSectionHead">島休區</div><div id="rollIsland"></div></div>
+        <div class="rollSection"><div id="rollAwayHead" class="rollSectionHead">返台區</div><div id="rollAway"></div></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="settings" class="panel"><div class="card"><button type="button" data-shion-switch>切換使用者</button></div>
+    <div id="guardPage" class="settingsPage">
+      <div class="card">
+        <div class="sectionTitle">衛哨設定</div>
+        <div class="inline" style="margin-bottom:4px"><label>哨點數
+          <select id="guardPointCount"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+        </label></div>
+        <div id="guardSettings"></div>
+      </div>
+    </div>
+    <div id="dutyPage" class="settingsPage">
+      <div class="card">
+        <div class="sectionTitle">勤務管理器</div>
+        <div class="inline"><label>勤務槽 <select id="dutySettingSelect"></select></label>
+          <label>名稱 <input id="dutySettingName" maxlength="20"><select id="systemTemplatePeriod" hidden><option value="breakfast">早餐</option><option value="lunch">中餐</option><option value="dinner">晚餐</option></select></label><label><input id="dutySettingOutside" type="checkbox"> 外出勤務</label></div>
+        <div class="inline" style="margin-top:5px"><label>版型 <select id="dutyPaintView"><option value="regular">常規｜昨21–今24</option><option value="tomorrow">跨明日｜昨21–明08</option><option value="full">3日｜72小時</option></select></label></div><div class="paintTools"><button data-paint-tool="red" class="on">亮紅・勤務</button><button data-paint-tool="yellow">黃・不建議</button><button data-paint-tool="blue">藍・補休</button><button data-paint-tool="clear">恢復綠色</button></div><div class="paintViewport"><div id="dutyMask" class="paintGrid"></div></div>
+      </div>
+    </div>
+    <div id="peoplePage" class="settingsPage">
+      <div class="card">
+        <div class="sectionTitle">人員來源</div>
+        <div class="sourcePanel"><div id="personSourceStatus" class="sourceStatus">尚未讀取312人員資料</div><div id="personSourcePages" class="sourcePages"></div><div class="syncActions"><button id="syncPersonnel" type="button">讀取312清冊</button><span class="small">可多選來源Page；正式人員資料由312提供。</span></div></div>
+        <div class="peopleDisplayOptions inline"><strong>顯示：</strong><label><input type="checkbox" data-person-column="rank" checked>階級</label><label><input type="checkbox" data-person-column="business" checked>業務</label><label><input type="checkbox" data-person-column="note" checked>備註</label></div>
+        <div class="peopleSection"><h3><span>正式清單・312同步</span><span id="officialPeopleCount">0 人</span></h3><table class="settingTable peopleTable"><thead><tr><th>#</th><th data-col="rank">階級</th><th>姓名</th><th data-col="business">業務</th><th data-col="note">勤務備註</th><th class="compactFlag">提早假</th><th class="compactFlag">無外散</th><th class="flagCell">免排</th><th class="flagCell">忽略</th></tr></thead><tbody id="peopleBody"></tbody></table></div>
+        <div class="peopleSection"><h3><span>臨時人員・313管理</span><button id="addTemporaryPerson" type="button">＋新增</button></h3><table class="settingTable peopleTable"><thead><tr><th>#</th><th data-col="rank">階級</th><th>人名</th><th data-col="note">業務／備註</th><th class="compactFlag">提早假</th><th class="compactFlag">無外散</th><th class="flagCell">免排</th><th class="flagCell">忽略</th><th class="deleteCell">刪除</th></tr></thead><tbody id="temporaryPeopleBody"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast">你家裡沒這個人喔</div>
+
+
+<div id="personModal" class="modal">
+  <div class="sheet">
+    <div class="sheetHead"><strong id="personModalTitle">快速人名</strong><div class="sheetHeadActions"><button id="applyDutyPeople" type="button" hidden>套用</button><button data-close="personModal">關閉</button></div></div>
+    <div id="personModalBody"></div>
+  </div>
+</div>
+
+
+
+<div id="zonePickerModal" class="modal"><div class="sheet"><div class="sheetHead"><strong id="zonePickerTitle">新增人員</strong><div class="sheetHeadActions"><button id="zonePickerApply" class="zonePickerApplyTop" type="button">套用</button><button data-close="zonePickerModal">關閉</button></div></div><div id="zonePickerBody"></div></div></div>
+<div id="zoneEditModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>變更分類</strong><button data-close="zoneEditModal">關閉</button></div><p id="zoneEditName"></p><select id="zoneEditTarget"></select><div class="inline" style="margin-top:7px"><button id="zoneEditApply">變更</button><button id="zoneEditRemove">移出</button></div></div></div>
+<div id="timelineDetailModal" class="modal"><div class="sheet"><div class="sheetHead"><strong id="timelineDetailTitle">狀態明細</strong><button data-close="timelineDetailModal">關閉</button></div><div id="timelineDetailBody"></div></div></div>
+<div id="systemMenuModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>系統資料</strong><button data-close="systemMenuModal">關閉</button></div><div class="systemMenuActions"><button id="dutySave" type="button">保存</button><button id="dutyExport" type="button">匯出整套資料</button><button id="dutyImport" type="button">載入資料</button><button id="openDutyAliases" type="button">姓名轉譯表</button><a href="310-主控台.html" style="color:#bdeaff;padding:9px;display:block">前往 310 主控台管理資料備份／還原</a></div></div></div>
+<div id="textExportSelectModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>選擇匯出內容</strong><button data-close="textExportSelectModal">關閉</button></div><div class="textExportActions"><button id="textExportSelectAll" type="button">全選</button><button id="textExportSelectNone" type="button">全不選</button><button id="textExportBuild" type="button">產生文字</button></div><div id="textExportList" class="textExportList"></div></div></div>
+<div id="textExportEditModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>勤務文字確認</strong><button data-close="textExportEditModal">關閉</button></div><div class="textExportActions"><button id="textExportBack" type="button">返回選擇</button><button id="textExportCopy" type="button">複製到剪貼簿</button></div><textarea id="textExportEditor" class="textExportEditor" spellcheck="false"></textarea></div></div>
+<div id="guardRestModal" class="modal"><div class="sheet"><div class="sheetHead"><strong id="guardRestTitle">哨點全域補休</strong><button data-close="guardRestModal">關閉</button></div><div class="inline"><label>版型 <select id="guardRestView"><option value="regular">常規｜昨21–今24</option><option value="tomorrow">跨明日｜昨21–明08</option><option value="full">3日｜72小時</option></select></label><button id="clearGuardRest">全部清除</button></div><div class="small">直接塗藍；此哨點班次在所有日期共用同一份補休設定。</div><div class="paintViewport"><div id="guardRestGrid" class="paintGrid"></div></div></div></div>
+<div id="dailyDutyModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>當日勤務微調</strong><button id="dailyDutyReset">恢復預設時間</button><button data-close="dailyDutyModal">關閉</button></div><div class="inline"><label>名稱 <input id="dailyDutyName"></label><label>版型 <select id="dailyDutyView"><option value="regular">常規｜昨21–今24</option><option value="tomorrow">跨明日｜昨21–明08</option><option value="full">3日｜72小時</option></select></label></div><div class="paintTools" id="dailyDutyTools"><button data-daily-tool="red" class="on">亮紅・勤務</button><button data-daily-tool="yellow">黃・不建議</button><button data-daily-tool="blue">藍・補休</button><button data-daily-tool="clear">恢復綠色</button></div><div class="small">空值就是綠色；這裡只修改當日實例，不會回寫模板或其他日期。</div><div class="paintViewport"><div id="dailyDutyGrid" class="paintGrid"></div></div></div></div>
+
+<div id="dutyAliasModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>姓名轉譯表</strong><button data-close="dutyAliasModal">關閉</button></div><div id="dutyAliasList" class="aliasGrid"></div><button id="saveDutyAliases" type="button">儲存轉譯表</button></div></div>
+<div id="dutyAnnualModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>年度哨勤表 <small id="dutyAnnualStatus"></small></strong><button data-close="dutyAnnualModal">關閉</button></div><div class="dutyAnnualControls"><label>年份 <input id="dutyAnnualYear" type="number" min="2000" max="2100"></label><label>人員 <select id="dutyAnnualScope"><option value="d1">主建制</option><option value="all">全部</option></select></label><label>格子 <select id="dutyAnnualSize"><option value="1">極密</option><option value="2">密集</option><option value="3">標準</option><option value="4">放大</option></select></label><div class="dutyAnnualLegend"><span class="guard">一般衛哨</span><span class="hard">艱苦哨</span><span class="agent">日代</span><span class="watch">值星</span><span class="island">島休</span><span class="away">不在</span></div><div id="dutyAnnualMonths" class="dutyAnnualMonths"></div></div><div id="dutyAnnualCanvas" class="dutyAnnualCanvas"></div></div></div>
+<div id="dutyAnnualDetail" class="modal"><div class="sheet"><div class="sheetHead"><strong id="dutyAnnualDetailTitle"></strong><button data-close="dutyAnnualDetail">關閉</button></div><div id="dutyAnnualDetailBody"></div></div></div>
+<div id="lineImportModal" class="modal"><div class="sheet"><div class="sheetHead"><strong>LINE 勤務逆向匯入</strong><button data-close="lineImportModal">關閉</button></div><textarea id="lineImportText" rows="8" placeholder="貼上勤務表與行動準據"></textarea><button id="parseLineImport" type="button">解析並預覽</button><div id="lineImportPreview"></div><button id="applyLineImport" type="button" hidden>確認套用</button></div></div>
+<div id="systemPeopleModal" class="modal"><div class="sheet"><div class="sheetHead"><strong id="systemPeopleTitle"></strong><button data-close="systemPeopleModal">關閉</button></div><div id="systemPeopleBody"></div><button id="systemPeopleApply">套用人員</button></div></div>
+<script>
+/* Shared operations schema v1. Embedded identically in 313 and 313.
+   312 remains the identity authority in OracleShion:Management v1.
+   This DB contains canonical leaveRecords, islandRecords and dutyDays, never bridge snapshots.
+   All modifying transactions include meta and validate owner + epoch + revision before put/delete.
+*/
+window.ShionOps=(()=>{
+ const clone=x=>structuredClone(x);let frozen=true;
+ const data={roster:null,actor:'👤',leaves:[],leaveConfig:null,islands:[],days:{},dutySettings:null};
+ function freeze(reason){frozen=true;const box=document.getElementById('opsLock');box.hidden=false;box.querySelector('p').textContent=reason;document.getElementById('opsStatus').textContent='🔒 已暫停寫入'}
+ function refresh(){const s=ShionData.snapshot(),cfg=ShionData.config(),settings=cfg.settings||{},builds=settings.builds||[],businesses=settings.businesses||[],order=s.personnelOrders.find(r=>r.key==='main')?.value||{};const orderValue=p=>Number.isFinite(order.build?.[p.id])?order.build[p.id]:Infinity;const ps=s.people.slice().sort((a,b)=>a.departmentId.localeCompare(b.departmentId)||(builds.findIndex(x=>x.id===a.buildId)<0?999:builds.findIndex(x=>x.id===a.buildId))-(builds.findIndex(x=>x.id===b.buildId)<0?999:builds.findIndex(x=>x.id===b.buildId))||Number(!!b.pinned)-Number(!!a.pinned)||orderValue(a)-orderValue(b)||(a.name||'').localeCompare(b.name||'','zh-Hant'));
+ data.actor=ShionData.actor;data.roster={format:'OracleShion.DutyPersonnelBridge',version:2,updatedAt:new Date().toISOString(),actor:data.actor,pages:(settings.pageNames||['主建制區','第二區隊','離退調職','第四頁','第五頁']).map((name,i)=>({id:'d'+(i+1),name})),builds,people:ps.map((p,i)=>({...p,rosterOrder:i,buildName:builds.find(b=>b.id===p.buildId)?.name||'未設定',businessNames:(p.businessIds||[]).map(k=>businesses.find(b=>b.id===k)?.name).filter(Boolean)}))};
+ const view=ShionSchema.leaveView(s);data.leaves=view.records;data.leaveConfig={...(s.leaveConfig.find(r=>r.key==='main')?.value||{}),...view.config};data.islands=s.islandRecords;data.days=Object.fromEntries(s.dutyDays.map(r=>[r.id,r.value]));data.dutySettings=s.dutySettings.find(r=>r.key==='main')?.value||null;}
+ async function start(){try{await ShionData.start('duty');refresh();frozen=false;document.getElementById('opsLock').hidden=true;document.getElementById('opsResume').onclick=()=>location.reload();document.getElementById('opsStatus').textContent='✓ 共用資料已載入';return data;}catch(e){freeze(e.message);throw e}}
+ async function write(changes){if(frozen)return false;try{const s=ShionData.snapshot(),next={};for(const c of changes){const rows=next[c.store]||(next[c.store]=clone(s[c.store]));const key=ShionData.PK[c.store],id=c.remove===undefined?c.value[key]:c.remove,index=rows.findIndex(r=>r[key]===id);if(c.remove!==undefined){if(index>=0)rows.splice(index,1)}else if(index>=0)rows[index]=clone(c.value);else rows.push(clone(c.value));}await ShionData.commit(next);document.getElementById('opsStatus').textContent='✓ 已儲存';return true;}catch(e){freeze(e.message);return false}}
+ function saveDutySettings(settings){data.dutySettings=clone(settings);return write([{store:'dutySettings',value:{key:'main',value:clone(settings)}}])}
+ function saveDays(days){const rows=Object.entries(days).map(([id,value])=>({id,value:clone(value)}));return ShionData.commit({dutyDays:rows}).then(()=>{data.days=clone(days);return true}).catch(e=>{freeze(e.message);return false})}
+ async function setIsland(date,type,personIds,source='duty314'){if(frozen)return false;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!['island_am','island_pm','island_full','overnight'].includes(type))throw Error('島休登記格式不正確');const selected=new Set(personIds),family=ShionSchema.family({type}),prior=clone(data.islands),byId=new Map(prior.filter(r=>r.date===date&&ShionSchema.family(r)===family).map(r=>[r.personId,r]));let next=prior.filter(r=>!(r.date===date&&ShionSchema.family(r)===family&&((r.type===type&&!selected.has(r.personId))||selected.has(r.personId))));const now=new Date().toISOString();for(const personId of selected){if(!data.roster.people.some(p=>p.id===personId))continue;const old=byId.get(personId);next.push({...old,id:ShionSchema.recordId(personId,date,type),personId,date,type,days:type==='island_full'?1:type==='overnight'?0:0.5,pool:old?.pool||'island',purpose:'leave',status:'active',source:old?.source||'duty314',createdAt:old?.createdAt||now,createdBy:old?.createdBy||ShionUsers.current(),updatedAt:now,updatedBy:ShionUsers.current()});}try{await ShionData.commit({islandRecords:next});data.islands=next;return true}catch(e){freeze(e.message);return false}}
+ function islandIds(date,type){return data.islands.filter(r=>r.date===date&&r.type===type&&r.status!=='cancelled').map(r=>r.personId)}
+ window.addEventListener('shion-conflict',e=>freeze(e.detail));window.addEventListener('shion-user-changed',e=>{data.actor=e.detail?.emoji||'👤';if(!e.detail)ShionUsers.show();});
+ return{start,data,write,saveDutySettings,saveDays,setIsland,islandIds,freeze,actor:()=>ShionUsers.current()?.emoji||'👤',canWrite:()=>!frozen&&!!ShionUsers.current()};
+})();
+
+
+</script>
+<script>
+(async function(){
+'use strict';
+await window.ShionPluginsReady;const ops=window.ShionOps;try{await ops.start()}catch(e){return}
+const defaultSettings=()=>({
+  version:1,
+  guardPointCount:4,
+  guardPoints:Array.from({length:4},(_,g)=>({
+    name:'哨點'+(g+1),
+    offset:0,
+    shifts:g<2?[
+      {start:-3,end:-1,type:'夜哨',rest:'夜哨'},
+      {start:-1,end:1,type:'夜哨',rest:'夜哨'},
+      {start:1,end:3,type:'夜哨',rest:'夜哨'},
+      {start:3,end:5,type:'夜哨',rest:'夜哨'},
+      {start:5,end:7,type:'日哨',rest:''},
+      {start:7,end:9,type:'日哨',rest:''},
+      {start:9,end:11,type:'日哨',rest:''},
+      {start:11,end:13,type:'日哨',rest:''},
+      {start:13,end:15,type:'艱苦哨',rest:''},
+      {start:15,end:17,type:'日哨',rest:''},
+      {start:17,end:19,type:'日哨',rest:''},
+      {start:19,end:21,type:'日哨',rest:''}
+    ]:[]
+  })),
+  duties:Array.from({length:20},(_,i)=>({name:'勤務'+(i+1),mask:Array(54).fill(false),paint:{},outside:false})),
+  sourcePages:[],
+  sourceMeta:{updatedAt:'',syncedAt:''},
+  personFlags:{},
+  manpower:{grain:60,span:48,standbyStart:'0800',standbyEnd:'2100',display:{rank:true,business:true,note:true}},
+  people:[]
+});
+const defaultSchedule=()=>({version:1,days:{}});
+
+let settings=structuredClone({...defaultSettings(),...(ops.data.dutySettings||{})});
+let schedule={version:2,days:structuredClone(ops.data.days)};
+// Repair island rows written by the first LINE importer before 313 reads them.
+const legacyImportedIslands=ops.data.islands.filter(r=>r.source==='313'&&r.type==='island_full'&&r.status===undefined);
+if(legacyImportedIslands.length){const now=new Date().toISOString();const repaired=legacyImportedIslands.map(r=>({...r,status:'active',updatedAt:now,createdBy:r.createdBy||'👤',updatedBy:ops.actor()}));if(!await ops.write(repaired.map(value=>({store:'islandRecords',value}))))return;const byId=new Map(repaired.map(r=>[r.id,r]));ops.data.islands=ops.data.islands.map(r=>byId.get(r.id)||r)}
+const SYSTEMS=[{key:'day_agent',name:'日代',paint:rangedPaint(330,1080,'yellow')},{key:'duty_watch',name:'值星',paint:rangedPaint(0,1440,'yellow')},{key:'kitchen_help',name:'幫廚',paint:{}},{key:'meal_am',name:'早上打飯班',paint:{}},{key:'meal_noon',name:'中午打飯班',paint:{}},{key:'meal_pm',name:'晚上打飯班',paint:{}},{key:'standby',name:'待命班',paint:rangedPaint(0,1440,'yellow')},{key:'meal_ride',name:'三餐跟車',paint:{},mealPaint:{breakfast:rangedPaint(350,380,'red'),lunch:rangedPaint(630,660,'red'),dinner:rangedPaint(990,1020,'red')}}];
+const MEALS={breakfast:'早',lunch:'中',dinner:'晚'};
+function rangedPaint(start,end,color){return Object.fromEntries(Array.from({length:(end-start)/10},(_,i)=>[(start+1440)/10+i,color]))}
+function installSystems(remapSchedule=false){
+  const before=[...settings.duties];
+  const fixed=SYSTEMS.map(def=>{const template=before.find(d=>d.systemKey===def.key);if(template){template.name=def.name;return template}return{systemKey:def.key,name:def.name,paint:structuredClone(def.paint),mealPaint:structuredClone(def.mealPaint||{}),outside:def.key==='meal_ride',mask:[]}});
+  settings.duties=[...fixed,...before.filter(d=>!SYSTEMS.some(def=>def.key===d.systemKey))];
+  if(remapSchedule)for(const day of Object.values(schedule.days||{}))for(const rec of day.duties||[]){const prior=before[rec.dutyIndex];if(prior)rec.dutyIndex=settings.duties.indexOf(prior)}
+  return settings.duties.some((d,i)=>d!==before[i]);
+}
+function sysTemplate(key){return settings.duties.find(d=>d.systemKey===key)}
+function sysDay(ds,key){const day=schedule.days[ds]||(schedule.days[ds]={guards:[],duties:[],island:[],dutyCount:4,checks:{},special:{}});day.systems??={};return day.systems[key]??={people:[],pmPeople:[],handover:false,base:{breakfast:'',lunch:'',dinner:''},overrides:{}}}
+function sysPaint(ds,key,period='all'){const rec=sysDay(ds,key),tpl=sysTemplate(key);return rec.overrides?.[period]?.paint||(key==='meal_ride'?tpl.mealPaint[period]:tpl.paint)||{}}
+function systemAssignments(ds,key){const d=sysDay(ds,key);if(key==='meal_ride')return Object.entries(d.base).filter(([m,id])=>id).map(([period,personId])=>({personId,period}));if(key==='duty_watch'&&d.handover)return d.people.map(personId=>({personId,period:'am'})).concat(d.pmPeople.map(personId=>({personId,period:'pm'})));return d.people.map(personId=>({personId,period:'all'}))}
+function systemEventsFor(id,ds){const out=[];for(const def of SYSTEMS){for(const assignment of systemAssignments(ds,def.key).filter(x=>x.personId===id)){const period=assignment.period,reason=def.name+(MEALS[period]?'・'+MEALS[period]:period==='am'?'・交接前':period==='pm'?'・交接後':''),ev=paintEvents(ds,sysPaint(ds,def.key,period),reason,sysTemplate(def.key).outside);for(const e of ev){if(def.key==='duty_watch'&&sysDay(ds,def.key).handover){const boundary=absMs(ds,14);if(period==='am')e.e=Math.min(e.e,boundary);else e.s=Math.max(e.s,boundary)}if(e.s<e.e){e.assignmentKey=ds+':system:'+def.key+':'+period;e.systemKey=def.key;if(def.key==='standby'&&e.kind==='yellow')e.kind='standby';out.push(e)}}}}return out}
+function personOptions(value){return '<option value="">未指定</option>'+allNamedPeople().filter(p=>!p.ignore).map(p=>'<option value="'+escapeAttr(personId(p))+'" '+(value===personId(p)?'selected':'')+'>'+escapeHtml((p.rank?p.rank+' ':'')+p.name+(p.buildName?'・'+p.buildName:''))+'</option>').join('')}
+function systemPersonGrid(key,period,ids){return '<div class="systemPeopleGrid">'+ids.map(id=>{const alert=systemPersonAlert(key,period,id);return '<button type="button" class="systemPersonChip '+(alert?'person-alert-'+alert.kind:'')+'" data-sys-remove="'+key+'" data-period="'+period+'" data-person="'+escapeAttr(id)+'" title="移除 '+escapeAttr(personById(id)?.name||'未載入人員')+'">'+escapeHtml(personById(id)?.name||'未載入人員')+' ×</button>'}).join('')+'</div>'}
+function systemHeader(key,period,heading,number,check=''){return '<div class="systemDutyHead"><span class="systemDutyName">'+(number?'<b class="systemNumber">'+number+'</b> ':'')+escapeHtml(heading)+'</span>'+check+'<button type="button" class="systemTime" data-sys-time="'+key+'" data-period="'+period+'" title="調整當天事故時段">時間</button><button type="button" class="systemAdd" data-sys-add="'+key+'" data-period="'+period+'" title="新增人員">＋</button></div>'}
+function systemHTML(){return SYSTEMS.map((def,i)=>{const rec=sysDay(currentDate,def.key),number='S'+(i+1);let html='<section class="dutyRow systemDuty" data-system="'+def.key+'">';
+ if(def.key==='meal_ride'){
+   html+='<div class="systemDutyHead"><span class="systemDutyName"><b class="systemNumber">'+number+'</b> '+def.name+'</span></div>';
+   html+=Object.keys(MEALS).map(period=>'<div class="mealSlot"><span>'+MEALS[period]+'</span><button type="button" data-sys-add="meal_ride" data-period="'+period+'">'+escapeHtml(personById(rec.base[period])?.name||'＋選人')+'</button><button type="button" class="systemTime" data-sys-time="meal_ride" data-period="'+period+'">時間</button></div>').join('');
+ }else{
+  const split=def.key==='duty_watch'&&rec.handover,check=def.key==='duty_watch'?'<label class="systemHandover"><input type="checkbox" data-handover '+(rec.handover?'checked':'')+'>交接14</label>':'';
+  html+=systemHeader(def.key,split?'am':'all',def.name+(split?'・上午':''),number,check)+systemPersonGrid(def.key,split?'am':'all',rec.people);
+  if(split)html+=systemHeader(def.key,'pm','下午','')+systemPersonGrid(def.key,'pm',rec.pmPeople);
+ }
+ return html+'</section>'}).join('')}
+function renderSystems(){const el=document.getElementById('systemDutyGrid');if(el)el.innerHTML=systemHTML()}
+let systemPicker=null,systemTimeTarget=null;
+function openSystemPeople(key,period){
+ const rec=sysDay(currentDate,key),single=key==='meal_ride',ids=single?[rec.base[period]]:period==='pm'?rec.pmPeople:rec.people,groups=new Map();systemPicker={key,period,single};
+ document.getElementById('systemPeopleTitle').textContent=sysTemplate(key).name+'｜'+(period==='pm'?'1400後':period==='am'?'1400前':'人員');
+ allNamedPeople().filter(p=>!p.ignore).sort((a,b)=>(a.rosterOrder??a.index)-(b.rosterOrder??b.index)).forEach(p=>{const group=p.buildName||(p.source==='temporary'?'臨時人員':'未設定');if(!groups.has(group))groups.set(group,[]);groups.get(group).push(p)});
+ document.getElementById('systemPeopleBody').innerHTML=[...groups].map(([group,people])=>'<div class="zonePickerGroup"><h4>'+escapeHtml(group)+'・'+people.length+'員</h4><div class="zonePickerList">'+people.map(p=>{const id=personId(p),st=pickerAwayState(id);return'<label class="quickPerson dutyPickerPerson '+(st.absent?'isAbsent':'')+'"><span><strong>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'</strong><span class="statusline">'+escapeHtml((p.businessNames||[]).join('、'))+'</span>'+(st.absent?'<span class="pickerReason">'+escapeHtml(st.reasons.join('、'))+'</span>':'')+'</span><input type="'+(single?'radio':'checkbox')+'" '+(single?'name="mealPerson" ':'')+'data-sys-pick="'+escapeAttr(id)+'" '+(ids.includes(id)&&!st.absent?'checked':'')+' '+(st.absent?'disabled':'')+'></label>'}).join('')+'</div></div>').join('');
+ if(single)document.getElementById('systemPeopleBody').insertAdjacentHTML('afterbegin','<label class="quickPerson"><span>不指定</span><input type="radio" name="mealPerson" data-sys-pick="" '+(!ids[0]?'checked':'')+'></label>');document.getElementById('systemPeopleModal').classList.add('show')
+}
+function activeDailyRecord(){if(systemTimeTarget){const {key,period}=systemTimeTarget,rec=sysDay(currentDate,key);rec.overrides??={};return rec.overrides[period]??={name:sysTemplate(key).name,paint:structuredClone(sysPaint(currentDate,key,period))}}return dayData(currentDate).duties[dailyDutyTarget]}
+function openSystemTime(key,period){systemTimeTarget={key,period};dailyDutyTarget=null;const rec=activeDailyRecord();document.getElementById('dailyDutyName').value=rec.name+(MEALS[period]?'・'+MEALS[period]:period==='am'?'・1400前':period==='pm'?'・1400後':'');document.getElementById('dailyDutyName').disabled=true;renderDailyDuty();document.getElementById('dailyDutyModal').classList.add('show')}
+function selectedTemplatePaint(d){if(d.systemKey==='meal_ride'){const period=document.getElementById('systemTemplatePeriod').value||'breakfast';d.mealPaint??={};return d.mealPaint[period]??={}}return d.paint}
+function refreshAll(){renderSchedule();renderNewPages();if(document.getElementById('rollcall').classList.contains('active'))renderRollcall()}
+document.addEventListener('click',e=>{const add=e.target.closest('[data-sys-add]'),remove=e.target.closest('[data-sys-remove]'),time=e.target.closest('[data-sys-time]');if(add)openSystemPeople(add.dataset.sysAdd,add.dataset.period);if(time)openSystemTime(time.dataset.sysTime,time.dataset.period);if(remove){const d=sysDay(currentDate,remove.dataset.sysRemove),field=remove.dataset.period==='pm'?'pmPeople':'people';d[field]=d[field].filter(id=>id!==remove.dataset.person);saveSchedule();refreshAll()}if(e.target.id==='systemPeopleApply'&&systemPicker){const d=sysDay(currentDate,systemPicker.key),ids=[...document.querySelectorAll('[data-sys-pick]:checked')].map(el=>el.dataset.sysPick);if(systemPicker.single)d.base[systemPicker.period]=ids[0]||'';else d[systemPicker.period==='pm'?'pmPeople':'people']=ids;saveSchedule();document.getElementById('systemPeopleModal').classList.remove('show');refreshAll()}});
+document.addEventListener('change',e=>{let changed=false;const d=sysDay(currentDate,'meal_ride');if(e.target.matches('[data-handover]')){sysDay(currentDate,'duty_watch').handover=e.target.checked;changed=true}if(changed){saveSchedule();refreshAll()}if(e.target.id==='systemTemplatePeriod')renderDutySettingEditor(+document.getElementById('dutySettingSelect').value)});
+
+if(installSystems(true)){
+  const days=canonicalSchedule().days;
+  const updates=[{store:'dutySettings',value:{key:'main',value:structuredClone(settings)}},...Object.entries(days).map(([id,value])=>({store:'dutyDays',value:{id,value}}))];
+  if(!await ops.write(updates))return;
+  ops.data.dutySettings=structuredClone(settings);ops.data.days=structuredClone(days);
+}
+let currentDate=todayStr();
+let modalTarget=null;
+(settings.duties||[]).forEach(function(d){if(d.outside===undefined)d.outside=false;if(!d.paint||typeof d.paint!=='object'){d.paint={};(d.mask||[]).forEach((on,i)=>{if(on)for(let q=0;q<3;q++)d.paint[126+i*3+q]='red'})}Object.keys(d.paint).forEach(k=>{if(d.paint[k]==='green')delete d.paint[k]});delete d.rest});
+(settings.people||[]).forEach(function(p){p.rank=({'上等兵':'上兵','一等兵':'一兵','二等兵':'二兵'})[p.rank]||p.rank||'';if(p.noQuick===undefined)p.noQuick=false;if(p.ignore===undefined)p.ignore=false;if(p.earlyIslandLeave===undefined)p.earlyIslandLeave=false;if(p.noOutside===undefined)p.noOutside=false;if(!p.source)p.source='temporary';});
+if(!Array.isArray(settings.sourcePages))settings.sourcePages=[];
+if(!settings.sourceMeta||typeof settings.sourceMeta!=='object')settings.sourceMeta={updatedAt:'',syncedAt:''};
+if(!settings.personFlags||typeof settings.personFlags!=='object')settings.personFlags={};
+if(!settings.manpower||typeof settings.manpower!=='object')settings.manpower={grain:60,span:48,standbyStart:'0800',standbyEnd:'2100',display:{rank:true,business:true,note:true}};
+settings.manpower={grain:60,span:48,standbyStart:'0800',standbyEnd:'2100',display:{rank:true,business:true,note:true},...settings.manpower,display:{rank:true,business:true,note:true,...(settings.manpower.display||{})}};
+(settings.people||[]).forEach(function(p){const k=p.personId||p.name;if(!settings.personFlags[k])settings.personFlags[k]={};const f=settings.personFlags[k];if(f.earlyIslandLeave===undefined)f.earlyIslandLeave=false;if(f.noOutside===undefined)f.noOutside=false;});
+delete settings.rests;(settings.guardPoints||[]).forEach(function(gp){if(!Number.isFinite(Number(gp.offset)))gp.offset=0;else gp.offset=Number(gp.offset);(gp.shifts||[]).forEach(s=>{delete s.rest;if(!s.restPaint||typeof s.restPaint!=='object')s.restPaint={}})});
+let toastTimer=null;
+function showToast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800)}
+function checkTypedPerson(input){const name=String(input.value||'').trim();if(name&&!rosterHasName(name))showToast('你家裡沒這個人喔')}
+function migrateNames(){
+  Object.values(schedule.days||{}).forEach(dd=>{
+    (dd.guards||[]).forEach(x=>{if(typeof x.person==='number')x.person=getPersonName(x.person);if(x.person==null)x.person=''});
+    (dd.duties||[]).forEach(x=>{if(typeof x.person==='number')x.person=getPersonName(x.person);if(!Array.isArray(x.people))x.people=x.person?[{id:'',name:String(x.person)}]:[];delete x.person});
+    dd.island=(dd.island||[]).map(x=>typeof x==='number'?getPersonName(x):x).filter(Boolean);
+  });
+}
+migrateNames();
+(function migrateGuardRestToGlobal(){let changed=false;Object.values(schedule.days||{}).forEach(dd=>(dd.guards||[]).forEach(rec=>{if(!rec.restPaint||!Object.keys(rec.restPaint).length)return;const sh=settings.guardPoints?.[rec.guardPoint]?.shifts?.[rec.slot];if(sh){if(!sh.restPaint||typeof sh.restPaint!=='object')sh.restPaint={};Object.assign(sh.restPaint,rec.restPaint);changed=true}delete rec.restPaint}));if(changed){saveSettings();saveSchedule()}})();
+
+function saveSettings(){const stamp=new Date().toISOString();settings.createdAt=settings.createdAt||stamp;settings.createdBy=settings.createdBy||ops.actor();settings.updatedAt=stamp;settings.updatedBy=ops.actor();return ops.saveDutySettings(settings)}
+function canonicalSchedule(){const days=structuredClone(schedule.days);for(const d of Object.values(days)){d.island=[];if(d.special)for(const k of ['island_am','island_pm','island_full','overnight','standby','duty_watch'])delete d.special[k]}return{version:2,days}}
+function touchDutyDay(ds=currentDate){const day=schedule.days[ds];if(!day)return;const stamp=new Date().toISOString();day.createdAt=day.createdAt||stamp;day.createdBy=day.createdBy||ops.actor();day.updatedAt=stamp;day.updatedBy=ops.actor()}
+function saveSchedule(ds=currentDate){touchDutyDay(ds);return ops.saveDays(canonicalSchedule().days)}
+function todayStr(){const d=new Date();return ymd(d)}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function addDays(ds,n){const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()+n);return ymd(d)}
+function dayData(ds){
+  if(!schedule.days[ds]) schedule.days[ds]={guards:[],duties:[],island:[],dutyCount:4,checks:{}};
+  const d=schedule.days[ds];if(!d.special||typeof d.special!=='object')d.special={};
+  ['standby','duty_watch','island_am','island_pm','island_full','overnight','leave_home','leave_local','training','recruitment','flight_leave_today','ship_leave_today','night_leave_today','flight_today','flight_yesterday','ship_today','ship_yesterday'].forEach(k=>{if(!Array.isArray(d.special[k]))d.special[k]=[]});
+  for(const k of ['island_am','island_pm','island_full','overnight'])d.special[k]=ops.islandIds(ds,k);
+  d.special.standby=[...new Set(systemAssignments(ds,'standby').map(x=>x.personId))];d.special.duty_watch=[...new Set(systemAssignments(ds,'duty_watch').map(x=>x.personId))];
+  if(typeof LEAVE_MANAGED_KEYS!=='undefined'){for(const k of LEAVE_MANAGED_KEYS)d.special[k]=[];const source=leaveBridgeStateFor(ds);source.byId.forEach((k,id)=>d.special[k].push(id))}
+  return d;
+}
+function absMs(ds,hours){
+  const d=new Date(ds+'T00:00:00'); d.setMinutes(d.getMinutes()+Math.round(hours*60)); return d.getTime();
+}
+function hhmmFromMs(ms){
+  const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')
+}
+function fmtShift(ds,s,e){return hhmmFromMs(absMs(ds,s))+'-'+hhmmFromMs(absMs(ds,e))}
+function activePeople(){return settings.people.map((p,i)=>({...p,index:i})).filter(p=>p.name.trim()&&!p.ignore&&!p.noQuick)}
+function allNamedPeople(){return settings.people.map((p,i)=>({...p,index:i})).filter(p=>p.name.trim())}
+function getPersonName(idx){return settings.people[idx]?.name||''}
+function readPersonnelBridge(){return ops.data.roster}
+function readLeaveBridge(){return{format:'OracleShion.LeaveOperationBridge',version:2,updatedAt:ops.data.leaveConfig?.updatedAt||'',updatedBy:ops.data.leaveConfig?.updatedBy||'👤',records:ops.data.leaves.filter(r=>!r.archived&&r.recordState!=='sent-delete')}}
+const LEAVE_STANDARD_TOOLS=['公機','自機','公船','自船','C130'];
+const LEAVE_MANAGED_KEYS=['leave_home','leave_local','training','recruitment','flight_leave_today','ship_leave_today','night_leave_today','flight_today','flight_yesterday','ship_today','ship_yesterday'];
+function leaveToolKind(tool){return tool==='C130'||String(tool||'').includes('機')?'plane':String(tool||'').includes('船')?'boat':'special'}
+function leaveBridgeStateFor(ds){const bridge=readLeaveBridge(),byId=new Map(),skipped=[];if(!bridge)return{bridge:null,byId,skipped};const known=new Set(settings.people.filter(p=>p.source==='312'&&p.personId).map(p=>p.personId)),put=(id,key)=>{const old=byId.get(id),priority={recruitment:110,training:100,leave_local:95,leave_home:90,flight_today:80,ship_today:80,flight_leave_today:70,ship_leave_today:70,night_leave_today:70,flight_yesterday:60,ship_yesterday:60};if(!old||(priority[key]||0)>(priority[old]||0))byId.set(id,key)};(bridge.records||[]).forEach(r=>{if(!known.has(r.personId)){skipped.push(r);return}(r.trainings||[]).forEach(t=>{if(t.start<=ds&&ds<=t.end)put(r.personId,'training')});(r.recruitments||[]).forEach(t=>{if(t.start<=ds&&ds<=t.end)put(r.personId,'recruitment')});if(!r.startDate||!r.endDate)return;const startKind=leaveToolKind(r.startTool),endKind=leaveToolKind(r.endTool),night=r.startRoute==='夜航';if(night&&ds===addDays(r.startDate,-1))put(r.personId,'night_leave_today');if(ds<r.startDate||ds>addDays(r.endDate,1))return;if(ds===r.startDate){if(night||!LEAVE_STANDARD_TOOLS.includes(r.startTool))put(r.personId,'leave_home');else put(r.personId,startKind==='plane'?'flight_leave_today':'ship_leave_today');return}if(ds<r.endDate){put(r.personId,'leave_home');return}if(ds===r.endDate){if(r.actualReturnDate===ds)return;if(!LEAVE_STANDARD_TOOLS.includes(r.endTool))put(r.personId,'leave_home');else put(r.personId,endKind==='plane'?'flight_today':'ship_today');return}if(ds===addDays(r.endDate,1)&&LEAVE_STANDARD_TOOLS.includes(r.endTool))put(r.personId,endKind==='plane'?'flight_yesterday':'ship_yesterday')});for(const [stampKey,value] of Object.entries(ops.data.leaveConfig?.annualStamps||{}))if(value==='local'&&stampKey.endsWith('|'+ds)){const id=stampKey.slice(0,-ds.length-1);if(known.has(id))put(id,'leave_local')}return{bridge,byId,skipped}}
+function currentManagedLeaveMap(){const d=dayData(currentDate).special,m=new Map();LEAVE_MANAGED_KEYS.forEach(k=>(d[k]||[]).forEach(id=>m.set(id,k)));return m}
+function leaveDiffLines(next){const old=currentManagedLeaveMap(),ids=new Set([...old.keys(),...next.keys()]),lines=[];ids.forEach(id=>{const a=old.get(id)||'無',b=next.get(id)||'無';if(a!==b){const p=personById(id);lines.push(`${p?.name||id}：${SPECIAL_ZONES[a]||a} → ${SPECIAL_ZONES[b]||b}`)}});return lines}
+function applyManagedLeave(next,label,extra=''){const diff=leaveDiffLines(next);if(diff.length&&!confirm(`${label}會異動 ${diff.length} 人：\n${diff.slice(0,12).join('\n')}${diff.length>12?'\n…其餘 '+(diff.length-12)+' 人':''}${extra}\n\n確定覆蓋目前可由假表管理的休假分類？`))return false;const d=dayData(currentDate).special;LEAVE_MANAGED_KEYS.forEach(k=>d[k]=[]);next.forEach((k,id)=>{if(d[k]&&!d[k].includes(id))d[k].push(id)});saveSchedule();renderManpowerControl();renderNewPages();showToast(diff.length?label+'已覆蓋・異動'+diff.length+'人':label+'與目前資料相同');return true}
+function importLeaveBridgeForCurrentDay(){showToast('已直接讀取313正式資料');refreshAll();return;const x=leaveBridgeStateFor(currentDate);if(!x.bridge){showToast('找不到313正式休假資料');return}const extra=x.skipped.length?`\n另有 ${x.skipped.length} 筆建置人員未在目前313載入頁面，將略過。`:'';applyManagedLeave(x.byId,'313假表',extra)}
+function futureLeaveEvents(ds){const bridge=readLeaveBridge();if(!bridge)return[];const known=new Map(settings.people.filter(p=>p.personId).map(p=>[p.personId,p])),out=[];(bridge.records||[]).forEach(r=>{const p=known.get(r.personId);if(!p)return;const name=p.name||r.nameSnapshot||'',startKind=leaveToolKind(r.startTool),endKind=leaveToolKind(r.endTool),night=r.startRoute==='夜航';if(night){if(addDays(r.startDate,-1)===ds)out.push({type:'船休',detail:'夜航',name})}else if(r.startDate===ds)out.push({type:startKind==='plane'?'機休':startKind==='boat'?'船休':'特殊休',detail:startKind==='special'?r.startTool:'',name});if(r.endDate===ds)out.push({type:endKind==='plane'?'機收':endKind==='boat'?'船收':'特殊收',detail:endKind==='special'?r.endTool:'',name})});for(const [key,value] of Object.entries(ops.data.leaveConfig?.annualStamps||{}))if(value==='local'&&key.endsWith('|'+ds)){const personId=key.slice(0,-ds.length-1),p=known.get(personId);if(p)out.push({type:'在馬休',detail:'',name:p.name||''})}return out}
+function renderFutureLeave(){const box=document.getElementById('futureLeaveList'),stamp=document.getElementById('futureLeaveStamp'),bridge=readLeaveBridge();if(!box)return;if(!bridge){stamp.textContent='313尚無資料';box.innerHTML='<div class="small">313儲存後，這裡會顯示選定日起後三日預報。</div>';return}stamp.textContent='資料 '+(bridge.updatedAt?new Date(bridge.updatedAt).toLocaleString()+(bridge.updatedBy||'👤'):'時間未知');box.innerHTML=[0,1,2].map(n=>{const ds=addDays(currentDate,n),events=futureLeaveEvents(ds),groups=new Map();events.forEach(e=>{const k=e.type+'｜'+e.detail;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(e.name)});return`<div class="controlZone"><div class="controlZoneHead"><span>${ds}${n===0?' 選定日':''}</span><small>${events.length}員次</small></div>${groups.size?[...groups].map(([k,names])=>{const [type,detail]=k.split('｜');return`<div>${escapeHtml(type)}${detail?'・'+escapeHtml(detail):''}：${escapeHtml(names.join('、'))}</div>`}).join(''):'<div class="small">無休收異動</div>'}</div>`}).join('')}
+function localStamp(){const d=new Date();return ymd(d)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function syncPersonnel(showMessage=true){const bridge=readPersonnelBridge();if(!bridge){if(showMessage)showToast('找不到312勤務人員資料');renderPersonnelSettings();return false;}const pages=Array.isArray(bridge.pages)?bridge.pages:[];if(!settings.sourcePages.length&&pages.length)settings.sourcePages=[pages[0].id];settings.people.filter(p=>p.source==='312').forEach((p,i)=>rememberPersonDutyState(i));const temporary=settings.people.filter(p=>p.source==='temporary');const official=(bridge.people||[]).filter(p=>settings.sourcePages.includes(p.departmentId)).map((p,i)=>{const keep=settings.personFlags[p.id]||{};return{source:'312',personId:p.id,departmentId:p.departmentId,name:p.name||'',rank:DUTY_RANK_ALIASES[p.rank]||p.rank||'',buildId:p.buildId||'',buildName:p.buildName||'未設定',rosterOrder:Number.isFinite(p.rosterOrder)?p.rosterOrder:i,businessNames:Array.isArray(p.businessNames)?p.businessNames:[],note:keep.note||'',noQuick:!!keep.noQuick,ignore:!!keep.ignore,earlyIslandLeave:!!keep.earlyIslandLeave,noOutside:!!keep.noOutside}}).sort((a,b)=>(a.rosterOrder??99999)-(b.rosterOrder??99999));settings.people=official.concat(temporary);settings.sourceMeta={updatedAt:bridge.updatedAt||'',syncedAt:new Date().toISOString(),pages,builds:bridge.builds||[]};saveSettings();renderPersonnelSettings();renderSchedule();renderManpowerControl();if(showMessage)showToast('已讀取312清冊・'+official.length+'人');return true}
+function rememberPersonDutyState(index){const p=settings.people[index];if(!p)return;const key=p.personId||p.name;settings.personFlags[key]={note:p.note||'',noQuick:!!p.noQuick,ignore:!!p.ignore,earlyIslandLeave:!!p.earlyIslandLeave,noOutside:!!p.noOutside}}
+const DUTY_RANK_ALIASES={'上等兵':'上兵','一等兵':'一兵','二等兵':'二兵'};
+const DUTY_RANKS=['一級上將','二級上將','中將','少將','上校','中校','少校','上尉','中尉','少尉','一等士官長','二等士官長','三等士官長','上士','中士','下士','上兵','一兵','二兵'];
+function renderPersonnelSettings(){
+ const bridge=readPersonnelBridge(),status=document.getElementById('personSourceStatus'),pages=document.getElementById('personSourcePages'),display=settings.manpower.display;
+ if(bridge){status.textContent='312已連接｜來源更新 '+(bridge.updatedAt?new Date(bridge.updatedAt).toLocaleString():'未知')+'｜目前載入 '+settings.people.filter(p=>p.source==='312').length+' 人';pages.innerHTML=(bridge.pages||[]).map(p=>'<label><input type="checkbox" data-source-page="'+escapeAttr(p.id)+'" '+(settings.sourcePages.includes(p.id)?'checked':'')+'>'+escapeHtml(p.name)+'</label>').join('')}else{status.textContent='找不到312勤務資料；目前使用上次同步清單。';pages.innerHTML='<span class="small">請先開啟312並儲存一次，再回來同步。</span>'}
+ document.querySelectorAll('[data-person-column]').forEach(x=>x.checked=!!display[x.dataset.personColumn]);document.querySelectorAll('.peopleTable [data-col]').forEach(x=>x.classList.toggle('columnHidden',!display[x.dataset.col]));
+ const official=settings.people.map((p,i)=>({p,i})).filter(x=>x.p.source==='312'),temporary=settings.people.map((p,i)=>({p,i})).filter(x=>x.p.source==='temporary');document.getElementById('officialPeopleCount').textContent=official.length+' 人';
+ document.getElementById('peopleBody').innerHTML=official.map((x,n)=>'<tr class="officialPerson"><td>'+(n+1)+'</td><td class="rankCell '+(display.rank?'':'columnHidden')+'" data-col="rank">'+escapeHtml(x.p.rank||'—')+'</td><td class="personNameCell">'+escapeHtml(x.p.name)+'<div class="personMeta">'+escapeHtml(x.p.buildName||((bridge?.pages||[]).find(q=>q.id===x.p.departmentId)?.name||''))+'</div></td><td class="'+(display.business?'':'columnHidden')+'" data-col="business">'+escapeHtml((x.p.businessNames||[]).join('、')||'—')+'</td><td class="'+(display.note?'':'columnHidden')+'" data-col="note"><input data-person-note="'+x.i+'" value="'+escapeAttr(x.p.note||'')+'"></td><td class="compactFlag"><input type="checkbox" data-person-early="'+x.i+'" '+(x.p.earlyIslandLeave?'checked':'')+'></td><td class="compactFlag"><input type="checkbox" data-person-nooutside="'+x.i+'" '+(x.p.noOutside?'checked':'')+'></td><td class="flagCell"><input type="checkbox" data-person-noquick="'+x.i+'" '+(x.p.noQuick?'checked':'')+'></td><td class="flagCell"><input type="checkbox" data-person-ignore="'+x.i+'" '+(x.p.ignore?'checked':'')+'></td></tr>').join('')||'<tr><td colspan="9">尚未載入正式人員</td></tr>';
+ const rankOptions=p=>'<option value="">未設定</option>'+DUTY_RANKS.map(r=>'<option '+(p.rank===r?'selected':'')+'>'+r+'</option>').join('');
+ document.getElementById('temporaryPeopleBody').innerHTML=temporary.map((x,n)=>'<tr><td>'+(n+1)+'</td><td data-col="rank" style="display:'+(display.rank?'':'none')+'"><select data-temp-rank="'+x.i+'">'+rankOptions(x.p)+'</select></td><td><input class="name" data-person-name="'+x.i+'" value="'+escapeAttr(x.p.name||'')+'"></td><td data-col="note" style="display:'+(display.note?'':'none')+'"><input data-person-note="'+x.i+'" value="'+escapeAttr(x.p.note||'')+'"></td><td class="compactFlag"><input type="checkbox" data-person-early="'+x.i+'" '+(x.p.earlyIslandLeave?'checked':'')+'></td><td class="compactFlag"><input type="checkbox" data-person-nooutside="'+x.i+'" '+(x.p.noOutside?'checked':'')+'></td><td class="flagCell"><input type="checkbox" data-person-noquick="'+x.i+'" '+(x.p.noQuick?'checked':'')+'></td><td class="flagCell"><input type="checkbox" data-person-ignore="'+x.i+'" '+(x.p.ignore?'checked':'')+'></td><td class="deleteCell"><button type="button" data-temp-delete="'+x.i+'">刪</button></td></tr>').join('')||'<tr><td colspan="9">尚無臨時人員</td></tr>';
+}
+function parseHHMM(s){
+  if(!/^\d{4}$/.test(s||'')) return null;
+  const h=+s.slice(0,2),m=+s.slice(2); if(h>23||m>59)return null; return h*60+m;
+}
+function dutyIntervalsFor(ds,dutyIdx){
+  const d=settings.duties[dutyIdx]; if(!d)return[];
+  if(d.paint&&Object.keys(d.paint).length){const out=[];let run=null;for(let i=0;i<432;i++){const on=d.paint[i]==='red';if(on&&run===null)run=i;if((!on||i===431)&&run!==null){const end=on&&i===431?432:i;out.push([absMs(ds,-24+run/6),absMs(ds,-24+end/6)]);run=null}}return out}
+  const out=[];
+  let run=null;
+  for(let i=0;i<54;i++){
+    const on=!!d.mask[i];
+    if(on&&run===null)run=i;
+    if((!on||i===53)&&run!==null){
+      const end=on&&i===53?54:i;
+      out.push([absMs(ds,-3+run*.5),absMs(ds,-3+end*.5)]);
+      run=null;
+    }
+  }
+  return out;
+}
+function paintEvents(ds,paint,name,outside=false){const out=[];for(const paintKind of ['red','yellow','blue']){let run=null;for(let i=0;i<=432;i++){const on=i<432&&paint?.[i]===paintKind;if(on&&run===null)run=i;if(!on&&run!==null){const assigned=true,kind=paintKind==='red'?'duty':paintKind,source=name||'勤務',reason=paintKind==='blue'?source+'・補休':source;out.push({s:absMs(ds,-24+run/6),e:absMs(ds,-24+i/6),kind,reason,priority:paintKind==='red'?110:70,assignment:assigned,assignmentType:assigned?'duty':'',outside:assigned&&outside});run=null}}}return out}
+function dutyPaintEvents(ds,dutyIdx){const d=settings.duties[dutyIdx];return paintEvents(ds,d?.paint,d?.name)}
+function dutyRecordEvents(ds,rec){const tpl=settings.duties[rec.dutyIndex];return paintEvents(ds,rec.paint||tpl?.paint,rec.name||tpl?.name,rec.outside??tpl?.outside)}
+function dutyRecordIntervals(ds,rec){return dutyRecordEvents(ds,rec).filter(x=>x.kind==='duty').map(x=>[x.s,x.e])}
+function ensureGuardRecords(){
+  const dd=dayData(currentDate);
+  const expected=[];
+  for(let g=0;g<settings.guardPointCount;g++){
+    const gp=settings.guardPoints[g];
+    gp.shifts.slice(0,12).forEach((sh,si)=>{
+      if(sh.start==='' || sh.end==='' || !Number.isFinite(Number(sh.start)) || !Number.isFinite(Number(sh.end))) return;
+      const start=absMs(currentDate,Number(sh.start)),end=absMs(currentDate,Number(sh.end));
+      let rec=dd.guards.find(x=>x.guardPoint===g&&x.slot===si);
+      if(!rec){rec={guardPoint:g,slot:si,person:'',start,end,type:sh.type};dd.guards.push(rec)}
+      rec.start=start;rec.end=end;rec.type=sh.type;delete rec.rest;
+      expected.push(g+':'+si);
+    })
+  }
+  dd.guards=dd.guards.filter(x=>expected.includes(x.guardPoint+':'+x.slot));
+  saveSchedule();
+}
+function getConflicts(){
+  const dd=dayData(currentDate), alerts=new Map(),guardRules=new Map();
+  const add=(key,kind)=>{if(!alerts.has(key))alerts.set(key,new Set());alerts.get(key).add(kind)};
+  const addRule=(key,kind)=>{if(!guardRules.has(key))guardRules.set(key,new Set());guardRules.get(key).add(kind)};
+  const guards=dd.guards.filter(x=>x.person);
+
+  // less than 6h, all guard points connected
+  for(let i=0;i<guards.length;i++)for(let j=i+1;j<guards.length;j++){
+    if((guards[i].personId||guards[i].person)!==(guards[j].personId||guards[j].person))continue;
+    const a=guards[i],b=guards[j],gap=Math.max(b.start-a.end,a.start-b.end);
+    const overlap=a.start<b.end&&b.start<a.end;
+    if(overlap||gap<6*3600000){addRule('g:'+a.guardPoint+':'+a.slot,'pink');addRule('g:'+b.guardPoint+':'+b.slot,'pink')}
+  }
+
+  // same shift yesterday, same guard point and actual local clock interval
+  const prev=dayData(addDays(currentDate,-1));
+  guards.forEach(g=>{
+    const st=new Date(g.start),en=new Date(g.end);
+    const found=prev.guards?.some(p=>(p.personId||p.person)===(g.personId||g.person)&&p.guardPoint===g.guardPoint&&
+      new Date(p.start).getHours()===st.getHours()&&new Date(p.start).getMinutes()===st.getMinutes()&&
+      new Date(p.end).getHours()===en.getHours()&&new Date(p.end).getMinutes()===en.getMinutes());
+    if(found)addRule('g:'+g.guardPoint+':'+g.slot,'yellow');
+  });
+
+  // 夜哨最多連續2個勤務日；第3日標紅
+  guards.forEach(g=>{
+    if(g.type!=='夜哨')return;
+    const p=g.personId||g.person;
+    const nightPrev=(ds)=>dayData(ds).guards?.some(x=>(x.personId||x.person)===p&&x.type==='夜哨');
+    if(nightPrev(addDays(currentDate,-1))&&nightPrev(addDays(currentDate,-2))) addRule('g:'+g.guardPoint+':'+g.slot,'red');
+  });
+
+  // 同一勤務日：夜哨與艱苦哨合計最多一班
+  const highByPerson={};guards.forEach(g=>{if(['夜哨','艱苦哨'].includes(g.type))(highByPerson[g.personId||g.person]??=[]).push(g)});Object.values(highByPerson).forEach(list=>{if(list.length>1)list.forEach(g=>addRule('g:'+g.guardPoint+':'+g.slot,'red'))});
+
+  // Only red assignment time is a hard scheduling conflict. Other rights set the warning color.
+  guards.forEach(g=>{const id=g.personId||personId(personByName(g.person)),key='g:'+g.guardPoint+':'+g.slot,offset=Math.round((Number(settings.guardPoints?.[g.guardPoint]?.offset)||0)*60)*60000,hit=personScheduleConflict(id,key,[[g.start+offset,g.end+offset]]);if(hit)add(key,hit.kind)});
+  alerts.guardRules=guardRules;return alerts;
+}
+function alertClass(set){if(!set)return'';for(const kind of ['absent','callable','blue','standby','watch','duty','guard','red','pink','yellow'])if(set.has(kind))return'field-alert-'+kind;return''}
+function personScheduleConflict(id,own,intervals){
+ if(!id||!intervals.length)return null;
+ const overlaps=e=>intervals.some(([a,b])=>a<e.e&&e.s<b),hits=[],record=(e,kind,reason)=>{if(overlaps(e))hits.push({kind,reason:reason||e.reason||kind})},dd=dayData(currentDate),p=personById(id),name=p?.name;
+ dd.guards.forEach(g=>{const key='g:'+g.guardPoint+':'+g.slot;if(key===own||!(g.personId?g.personId===id:g.person===name))return;const off=Number(settings.guardPoints?.[g.guardPoint]?.offset)||0,delta=Math.round(off*60)*60000;record({s:g.start+delta,e:g.end+delta},'guard','衛哨 '+(settings.guardPoints[g.guardPoint]?.name||''));});
+ dd.duties.forEach((d,i)=>{if('d:'+i===own||d.dutyIndex===null||!dutyPeople(d).some(x=>x.id?x.id===id:x.name===name))return;dutyRecordEvents(currentDate,d).filter(e=>e.kind==='duty').forEach(e=>record(e,'duty',d.name||settings.duties[d.dutyIndex]?.name));});
+ for(const e of systemEventsFor(id,currentDate).filter(e=>e.kind==='duty')){if(own==='s:'+e.systemKey)continue;const def=SYSTEMS.find(x=>x.key===e.systemKey);record(e,e.systemKey==='duty_watch'?'watch':e.systemKey==='standby'?'standby':'duty',def?.name||e.reason)}
+ for(const ds of [addDays(currentDate,-1),currentDate,addDays(currentDate,1)]){
+  const day=dayData(ds);day.guards.filter(g=>(g.personId?g.personId===id:g.person===name)).forEach(g=>guardRestEvents(ds,g).forEach(e=>record(e,'blue','衛哨補休')));
+  day.duties.filter(d=>d.dutyIndex!==null&&dutyPeople(d).some(x=>x.id?x.id===id:x.name===name)).forEach(d=>dutyRecordEvents(ds,d).filter(e=>e.kind==='blue').forEach(e=>record(e,'blue','勤務補休')));
+  if(ds!==addDays(currentDate,1))islandEvents(id,ds).forEach(e=>record(e,'callable',e.reason));
+ }
+ systemEventsFor(id,currentDate).filter(e=>e.kind==='blue').forEach(e=>record(e,'blue',e.reason));
+ for(const ds of [addDays(currentDate,-1),currentDate])specialIntervalsFor(id,ds).filter(e=>e.kind==='absent').forEach(e=>record(e,'absent',e.reason));
+ const order={guard:1,duty:2,watch:3,standby:4,blue:5,callable:6,absent:7};hits.sort((a,b)=>(order[b.kind]||0)-(order[a.kind]||0));return hits[0]||null;
+}
+function dutyPersonAlert(row,name){const rec=dayData(currentDate).duties[row],busy=dutyRecordIntervals(currentDate,rec);return personScheduleConflict(personId(personByName(name)),'d:'+row,busy)}
+function systemPersonAlert(key,period,id){const paint=sysPaint(currentDate,key,period),intervals=paintEvents(currentDate,paint,'').filter(e=>e.kind==='duty').map(e=>[e.s,e.e]);return personScheduleConflict(id,'s:'+key,intervals)}
+function islandPersonAlert(key,id){const events=[islandEvents(id,addDays(currentDate,-1)),islandEvents(id,currentDate)].flat().filter(e=>e.group===({island_full:'全島',island_am:'上半島',island_pm:'下半島',overnight:'外宿'}[key]));if(!events.length)return false;const p=personById(id),name=p?.name,dd=dayData(currentDate);return dd.guards.some(g=>(g.personId?g.personId===id:g.person===name)&&events.some(e=>e.s<g.end&&g.start<e.e))||dd.duties.some(d=>d.dutyIndex!==null&&dutyPeople(d).some(x=>x.id?x.id===id:x.name===name)&&dutyRecordIntervals(currentDate,d).some(([a,b])=>events.some(e=>e.s<b&&a<e.e)))}
+function renderSchedule(){
+  ensureGuardRecords();
+  for(const day of Object.values(schedule.days))for(const g of day.guards||[])if(g.personId){const p=personById(g.personId);if(p)g.person=p.name}
+  const dd=dayData(currentDate),alerts=getConflicts();
+  const grid=document.getElementById('guardGrid');grid.innerHTML='';
+  for(let g=0;g<settings.guardPointCount;g++){
+    const gp=settings.guardPoints[g],box=document.createElement('div');box.className='guardPoint';
+    box.innerHTML='<div class="guardHead">'+escapeHtml(gp.name||('哨點'+(g+1)))+'</div>';
+    gp.shifts.slice(0,12).forEach((sh,si)=>{
+      if(sh.start==='' || sh.end==='' || !Number.isFinite(Number(sh.start)) || !Number.isFinite(Number(sh.end))) return;
+      const rec=dd.guards.find(x=>x.guardPoint===g&&x.slot===si);
+      const row=document.createElement('div');row.className='row';
+      const key='g:'+g+':'+si;
+      row.innerHTML='<div class="time '+alertClass(alerts.guardRules?.get(key))+'">'+fmtShift(currentDate,sh.start,sh.end)+'</div>'+
+        '<input title="'+((rec?.person&&!rosterHasName(rec.person))?'你家裡沒這個人喔':'')+'" class="'+alertClass(alerts.get(key))+((rec?.person&&!rosterHasName(rec.person))?' unknown-person':'')+'" data-guard-input="'+g+':'+si+'" value="'+escapeAttr(rec?.person||'')+'" placeholder="人名">'+
+        '<button data-quick-guard="'+g+':'+si+'">▼</button>';
+      box.appendChild(row);
+    });
+    grid.appendChild(box);
+  }
+  document.getElementById('scheduleHint').textContent='時間底色＝衛哨規範｜人名底色＝勤務衝突';
+  renderDutyArea(alerts);renderSystems();
+}
+function renderDutyArea(alerts){
+  const dd=dayData(currentDate),sel=document.getElementById('dutyCount');
+  if(!sel.options.length){for(let i=0;i<=20;i++)sel.add(new Option(i,i))}
+  sel.value=dd.dutyCount||0;
+  while(dd.duties.length<(dd.dutyCount||0))dd.duties.push({dutyIndex:null,people:[]});
+  dd.duties.length=dd.dutyCount||0;
+  const grid=document.getElementById('dutyGrid');grid.innerHTML='';
+  dd.duties.forEach((rec,i)=>{
+    const row=document.createElement('div');row.className='dutyRow';
+    const assigned=dutyPeople(rec).map(x=>({...x,name:personById(x.id)?.name||x.name}));
+    const options=['<option value="">勤務</option>'].concat(settings.duties.map((d,idx)=>d.systemKey?'':'<option value="'+idx+'" '+(rec.dutyIndex===idx?'selected':'')+'>'+escapeHtml(d.name||('勤務'+(idx+1)))+'</option>')).join('');
+    row.innerHTML='<div class="dutyContent"><select data-duty-select="'+i+'">'+options+'</select><button title="微調當日時間" data-edit-daily-duty="'+i+'">時間</button></div><div class="dutyPeople">'+assigned.map(p=>{const a=dutyPersonAlert(i,p.name);return'<button class="dutyPersonChip '+(a?'person-alert-'+a.kind:'')+'" title="'+escapeAttr(a?a.reason:'無衝突')+'" data-remove-duty-person="'+i+'" data-duty-person-id="'+escapeAttr(p.id||'')+'" data-duty-person-name="'+escapeAttr(p.name)+'">'+escapeHtml(p.name)+' ×</button>'}).join('')+'<button class="dutyAddPerson" data-quick-duty="'+i+'">＋</button></div><button class="danger" data-clear-duty="'+i+'">×</button>';
+    grid.appendChild(row);
+  });
+}
+function rosterHasName(name){name=String(name||'').trim();return !!name&&settings.people.some(p=>p.name.trim()===name)}
+function personIndexByName(name){
+  name=(name||'').trim(); if(!name)return null;
+  const i=settings.people.findIndex(p=>p.name.trim()===name);return i<0?null:i;
+}
+function recentDateFor(kind,ref,personIdx){
+  const personName=getPersonName(personIdx);
+  for(let back=1;back<=7;back++){
+    const ds=addDays(currentDate,-back),dd=schedule.days[ds];if(!dd)continue;
+    if(kind==='guard'){
+      const [g,slot]=ref;
+      if(dd.guards?.some(x=>x.guardPoint===g&&x.slot===slot&&x.person===personName))return ds.slice(5).replace('-','/');
+    }else{
+      const dutyIndex=ref;
+      if(dd.duties?.some(x=>x.dutyIndex===dutyIndex&&dutyNames(x).includes(personName)))return ds.slice(5).replace('-','/');
+    }
+  }
+  return null;
+}
+function openQuick(kind,ref,meta){
+  modalTarget={kind,ref,meta:meta||null};
+  document.getElementById('applyDutyPeople').hidden=true;
+  const body=document.getElementById('personModalBody'),groups=new Map();
+  activePeople().sort((a,b)=>(a.rosterOrder??a.index)-(b.rosterOrder??b.index)).forEach(p=>{const g=p.buildName||(p.source==='temporary'?'臨時人員':'未設定');if(!groups.has(g))groups.set(g,[]);groups.get(g).push(p)});
+  body.innerHTML=[...groups].map(([g,ps])=>'<div class="zonePickerGroup"><h4>'+escapeHtml(g)+'・'+ps.length+'員</h4><div class="zonePickerList">'+ps.map(p=>{const st=pickerAwayState(personId(p)),last=recentDateFor(kind,ref,p.index);return'<div class="quickPerson dutyPickerPerson '+(st.absent?'isAbsent':'')+'"><button '+(st.absent?'disabled':'')+' data-pick-person="'+p.index+'"><strong>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'</strong><span class="statusline"> '+escapeHtml((p.businessNames||[]).join('、'))+'｜末次 '+escapeHtml(last||'無紀錄')+'</span>'+(st.absent?'<span class="pickerReason">'+escapeHtml(st.reasons.join('、'))+'</span>':'')+'</button></div>'}).join('')+'</div></div>').join('');
+  document.getElementById('personModal').classList.add('show');
+}
+const AWAY_PICKER_KEYS=['training','recruitment','leave_home','leave_local','flight_leave_today','ship_leave_today','night_leave_today','flight_today','ship_today'];
+function pickerAwayState(id){const d=dayData(currentDate).special,reasons=AWAY_PICKER_KEYS.filter(k=>d[k].includes(id)).map(k=>SPECIAL_ZONES[k]);return{absent:reasons.length>0,reasons,standby:d.standby.includes(id)}}
+function dutyPickerState(id){return pickerAwayState(id)}
+function openDutyPeople(row){const rec=dayData(currentDate).duties[row],tpl=settings.duties[rec.dutyIndex],isOutside=rec.outside??tpl?.outside,selected=new Set(dutyPeople(rec).map(x=>x.id||personId(personByName(x.name)))),groups=new Map();modalTarget={kind:'dutyMulti',row,selected};activePeople().sort((a,b)=>(a.rosterOrder??a.index)-(b.rosterOrder??b.index)).forEach(p=>{const g=p.buildName||(p.source==='temporary'?'臨時人員':'未設定');if(!groups.has(g))groups.set(g,[]);groups.get(g).push(p)});const body=document.getElementById('personModalBody');document.getElementById('personModalTitle').textContent=(rec.name||tpl?.name||'勤務')+'｜選擇人員';document.getElementById('applyDutyPeople').hidden=false;body.innerHTML=[...groups].map(([g,ps])=>'<div class="zonePickerGroup"><h4>'+escapeHtml(g)+'・'+ps.length+'員</h4><div class="zonePickerList">'+ps.map(p=>{const id=personId(p),st=dutyPickerState(id),reason=st.reasons.concat(st.standby&&isOutside?'待命班・外出勤務避免':'').filter(Boolean).join('、');return'<label class="quickPerson dutyPickerPerson '+(st.absent?'isAbsent ':'')+(st.standby?'isStandby':'')+'"><span><strong>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'</strong><span class="statusline"> '+escapeHtml((p.businessNames||[]).join('、'))+'</span>'+(reason?'<span class="pickerReason">'+escapeHtml(reason)+'</span>':'')+'</span><input type="checkbox" data-duty-pick="'+escapeAttr(id)+'" data-duty-pick-name="'+escapeAttr(p.name)+'" '+(selected.has(id)?'checked':'')+' '+(st.absent?'disabled':'')+'></label>'}).join('')+'</div></div>').join('');document.getElementById('personModal').classList.add('show')}
+function shortRange(s,e){
+  const a=new Date(s),b=new Date(e);
+  const f=d=>String(d.getHours()).padStart(2,'0')+(d.getMinutes()?String(d.getMinutes()).padStart(2,'0'):'');
+  return f(a)+'-'+((b.getHours()===0&&b.getMinutes()===0&&b.getDate()!==a.getDate())?'24':f(b));
+}
+const SPECIAL_ZONES={standby:'待命班',duty_watch:'值星',island_am:'上半島',island_pm:'下半島',island_full:'全島',overnight:'外宿',leave_home:'返台休',leave_local:'在馬休',training:'受訓',recruitment:'招募',flight_leave_today:'今日機休',ship_leave_today:'今日船休',night_leave_today:'夜航',flight_today:'今日機收',flight_yesterday:'昨日機收',ship_today:'今日船收',ship_yesterday:'昨日船收'};
+const STATE_DEFS={overnight:{willAttend:false},green:{willAttend:true},yellow:{willAttend:true},standby:{willAttend:true},callable:{willAttend:false},blue:{willAttend:false},absent:{willAttend:false},guard:{willAttend:false},duty:{willAttend:false}};
+const SYSTEM_DUTY_KEYS=['standby','duty_watch'],ISLAND_KEYS=['island_am','island_pm','island_full','overnight'],LEAVE_KEYS=['leave_home','leave_local','training','recruitment','flight_leave_today','ship_leave_today','night_leave_today','flight_today','flight_yesterday','ship_today','ship_yesterday'];
+let zonePicker=null,zoneEditor=null;
+function personId(p){return p?(p.personId||('name:'+p.name)):''}
+function personById(id){return settings.people.find(p=>personId(p)===id)}
+function personByName(name){return settings.people.find(p=>p.name===name)}
+function dutyPeople(rec){if(!Array.isArray(rec.people))rec.people=rec.person?[{id:personId(personByName(rec.person)),name:rec.person}]:[];delete rec.person;rec.people=rec.people.map(x=>{const q=typeof x==='string'?{id:'',name:x}:x;if(!q.id)q.id=personId(personByName(q.name));return q}).filter(x=>x?.name);return rec.people}
+function dutyNames(rec){return dutyPeople(rec).map(x=>personById(x.id)?.name||x.name)}
+function rankClass(r){const i=DUTY_RANKS.indexOf(r);return i<0?'unknown':i<=9?'officer':i<=15?'nco':'enlisted'}
+function manpowerCount(ids){const c={total:0,officer:0,nco:0,enlisted:0,unknown:0};[...new Set(ids)].forEach(id=>{const p=personById(id);if(p&&!p.ignore){c.total++;c[rankClass(p.rank)]++}});return c}
+function manpowerCountText(ids){const c=manpowerCount(ids);return c.total+'員（官'+c.officer+'／士'+c.nco+'／兵'+c.enlisted+(c.unknown?'／未'+c.unknown:'')+'）'}
+function textSizeClass(s,limit){return String(s||'').length>limit+2?'veryLongText':String(s||'').length>limit?'longText':''}
+function personChip(p,key,tag='button'){const dutyClass=key==='standby'?' standbyChip':key==='duty_watch'?' watchChip':ISLAND_KEYS.includes(key)&&islandPersonAlert(key,personId(p))?' person-alert-callable':'';return'<'+tag+' class="controlChip'+dutyClass+'" '+(tag==='button'?'data-zone-edit="'+key+'" data-zone-person="'+escapeAttr(personId(p))+'"':'')+'><span class="rankPart '+textSizeClass(p.rank,2)+'">'+escapeHtml(p.rank||'—')+'</span><span class="namePart '+textSizeClass(p.name,3)+'">'+escapeHtml(p.name)+'</span></'+tag+'>'}
+function controlZone(key){const ids=dayData(currentDate).special[key]||[];return'<div class="controlZone"><div class="controlZoneHead"><span>'+SPECIAL_ZONES[key]+' <small>'+ids.length+'</small></span>'+(LEAVE_KEYS.includes(key)?'':'<button data-zone-add="'+key+'">＋</button>')+'</div><div class="controlChips">'+(ids.map(id=>{const p=personById(id);return p?personChip(p,key,LEAVE_KEYS.includes(key)?'span':'button'):''}).join('')||'<span class="small">尚無人員</span>')+'</div></div>'}
+function renderManpowerControl(){const d=dayData(currentDate);if(!d.specialMigrated&&d.island?.length){d.island.forEach(name=>{const p=personByName(name);if(p&&!d.special.island_full.includes(personId(p)))d.special.island_full.push(personId(p))});d.island=[];d.specialMigrated=true;saveSchedule()}const roster=settings.people.filter(p=>p.name&&!p.ignore).map(personId),taiwanKeys=['leave_home','leave_local','training','recruitment','flight_leave_today','ship_leave_today','night_leave_today','flight_today','ship_today'],leave=[...new Set(taiwanKeys.flatMap(k=>d.special[k]))],leaveSet=new Set(leave),stay=roster.filter(id=>!leaveSet.has(id)),training=d.special.training,recruitment=d.special.recruitment,island=[...new Set([...d.special.island_pm,...d.special.island_full])];document.getElementById('manpowerDateLabel').textContent=currentDate+'｜20:00回報基準';document.getElementById('manpowerSummary').innerHTML='<span class="badge">清冊人員 '+manpowerCountText(roster)+'</span><span class="badge g">留守人員 '+manpowerCountText(stay)+'</span><span class="badge r">休假人員 '+manpowerCountText(leave)+'</span><span class="badge y">受訓 '+manpowerCountText(training)+'</span><span class="badge" style="color:#d5a7ff">招募 '+manpowerCountText(recruitment)+'</span><span class="badge b">島休 '+manpowerCountText(island)+'</span>';document.getElementById('islandControl').innerHTML=ISLAND_KEYS.map(controlZone).join('');document.getElementById('leaveControl').innerHTML=LEAVE_KEYS.map(controlZone).join('');renderFutureLeave()}
+function zoneFamily(k){return k==='overnight'?['overnight']:ISLAND_KEYS.includes(k)?['island_am','island_pm','island_full']:SYSTEM_DUTY_KEYS.includes(k)?[k]:LEAVE_KEYS}
+function openZonePicker(k){if(LEAVE_KEYS.includes(k)){showToast('此項直接讀取313正式資料，請至313修改');return}const selected=new Set(dayData(currentDate).special[k]),groups=new Map(),allowAway=LEAVE_KEYS.includes(k);zonePicker={key:k,selected};settings.people.filter(p=>p.name&&!p.ignore).sort((a,b)=>(a.rosterOrder??99999)-(b.rosterOrder??99999)).forEach(p=>{const g=p.buildName||((p.source==='temporary')?'臨時人員':'未設定');if(!groups.has(g))groups.set(g,[]);groups.get(g).push(p)});document.getElementById('zonePickerTitle').textContent='新增至'+SPECIAL_ZONES[k];document.getElementById('zonePickerBody').innerHTML=[...groups].map(([g,ps])=>'<div class="zonePickerGroup"><h4>'+escapeHtml(g)+'・'+ps.length+'員</h4><div class="zonePickerList">'+ps.map(p=>{const st=pickerAwayState(personId(p)),blocked=ISLAND_KEYS.includes(k)?p.source!=='312':st.absent&&!allowAway;return'<label class="quickPerson dutyPickerPerson '+(blocked?'isAbsent':'')+'"><span><strong>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'</strong><span class="statusline">'+escapeHtml((p.businessNames||[]).join('、'))+'</span>'+(blocked?'<span class="pickerReason">'+escapeHtml(st.reasons.join('、')||'需由正式人事清冊選取')+'</span>':'')+'</span><input type="checkbox" data-zone-pick="'+escapeAttr(personId(p))+'" '+(selected.has(personId(p))?'checked':'')+' '+(blocked?'disabled':'')+'></label>'}).join('')+'</div></div>').join('');document.getElementById('zonePickerModal').classList.add('show')}
+async function applyZonePicker(){if(!zonePicker)return;const {key,selected}=zonePicker;if(ISLAND_KEYS.includes(key)){await ops.setIsland(currentDate,key,[...selected],'314');refreshAll();document.getElementById('zonePickerModal').classList.remove('show');return}if(key!=='leave_local'){showToast('此項讀取313正式資料，請在313修改');return}dayData(currentDate).special[key]=[...selected];saveSchedule();refreshAll();document.getElementById('zonePickerModal').classList.remove('show')}
+function openZoneEditor(k,id){if(LEAVE_KEYS.includes(k)){showToast('此項直接讀取313正式資料，請至313修改');return}zoneEditor={key:k,id};const p=personById(id),fam=zoneFamily(k);document.getElementById('zoneEditName').textContent=(p?.rank||'')+' '+(p?.name||'');document.getElementById('zoneEditTarget').innerHTML=fam.map(x=>'<option value="'+x+'" '+(x===k?'selected':'')+'>'+SPECIAL_ZONES[x]+'</option>').join('');document.getElementById('zoneEditModal').classList.add('show')}
+async function moveZone(removeOnly){if(!zoneEditor)return;const {key,id}=zoneEditor;if(ISLAND_KEYS.includes(key)){if(removeOnly)await ops.setIsland(currentDate,key,ops.islandIds(currentDate,key).filter(x=>x!==id),'314');else{const target=document.getElementById('zoneEditTarget').value;await ops.setIsland(currentDate,target,[...new Set([...ops.islandIds(currentDate,target),id])],'314')}refreshAll();document.getElementById('zoneEditModal').classList.remove('show');return}if(key!=='leave_local'){showToast('請在313修改正式休假資料');return}const d=dayData(currentDate);d.special[key]=d.special[key].filter(x=>x!==id);if(!removeOnly)d.special[key].push(id);saveSchedule();refreshAll();document.getElementById('zoneEditModal').classList.remove('show')}
+function carryYesterdaySpecial(){showToast('休假分類已依正式紀錄自動計算');return;const prev=dayData(addDays(currentDate,-1)).special,map={leave_home:'leave_home',leave_local:'leave_local',training:'training',recruitment:'recruitment',flight_leave_today:'leave_home',ship_leave_today:'leave_home',night_leave_today:'leave_home',flight_today:'flight_yesterday',ship_today:'ship_yesterday'},next=new Map();Object.entries(map).forEach(([a,b])=>(prev[a]||[]).forEach(id=>next.set(id,b)));applyManagedLeave(next,'昨日休假狀態')}
+function carryYesterdayDuties(){const prev=dayData(addDays(currentDate,-1)),now=dayData(currentDate),source=(prev.duties||[]).filter(x=>x.dutyIndex!==null&&x.dutyIndex!==undefined);if(!source.length){showToast('昨日沒有勤務可帶入');return}if((now.duties||[]).some(x=>x.dutyIndex!==null&&x.dutyIndex!==undefined)&&!confirm('今日已有勤務，確定以昨日勤務配置取代？\n人員不會帶入。'))return;now.duties=source.map(x=>({dutyIndex:x.dutyIndex,name:x.name||settings.duties[x.dutyIndex]?.name||'',paint:JSON.parse(JSON.stringify(x.paint||settings.duties[x.dutyIndex]?.paint||{})),outside:x.outside??settings.duties[x.dutyIndex]?.outside??false,people:[]}));now.dutyCount=Math.max(1,Math.min(20,now.duties.length));saveSchedule();renderSchedule();renderNewPages();showToast('已帶入昨日勤務・人員已清空')}
+function carryRoutineDuties(){const previous=schedule.days[addDays(currentDate,-1)],watch=previous?.systems?.duty_watch,helper=previous?.systems?.kitchen_help;if(!watch&&!helper){showToast('昨日沒有值星或幫廚可帶入');return}const targetWatch=sysDay(currentDate,'duty_watch'),targetHelper=sysDay(currentDate,'kitchen_help');targetWatch.handover=!!watch?.handover;if(targetWatch.handover){targetWatch.people=[...(watch?.people||[])].slice(0,1);targetWatch.pmPeople=[...(watch?.pmPeople||[])].slice(0,1)}else{targetWatch.people=[...(watch?.people||[])].slice(0,2);targetWatch.pmPeople=[]}targetHelper.people=[...(helper?.people||[])].slice(0,1);saveSchedule();refreshAll();const count=targetWatch.people.length+targetWatch.pmPeople.length+targetHelper.people.length;showToast('已帶入常態人員 '+count+' 員')}
+function timed(ds,a,b){const parse=v=>v==='2400'?1440:parseHHMM(v),pa=parse(a),pb=parse(b),base=new Date(ds+'T00:00:00').getTime();if(pa===null||pb===null)return null;let s=base+pa*60000,e=base+pb*60000;if(e<=s)e+=86400000;return[s,e]}
+function specialIntervalsFor(id,ds){const d=dayData(ds).special,p=personById(id),a=[];const push=(time,kind,reason,priority=50)=>{if(time)a.push({s:time[0],e:time[1],kind,reason,priority})};if(d.standby.includes(id))push(timed(ds,'0000','2400'),'standby','待命班・不得離營',25);if(d.leave_home.includes(id))push(timed(ds,'0000','2400'),'absent','返台休',80);if(d.leave_local.includes(id))push(timed(ds,'0000','2400'),'absent','在馬休',80);if(d.training.includes(id))push(timed(ds,'0000','2400'),'absent','受訓',80);if(d.recruitment.includes(id))push(timed(ds,'0000','2400'),'absent','招募',80);if(d.flight_leave_today.includes(id)){push(timed(ds,'0600','0800'),'callable','今日機休待離營',60);push(timed(ds,'0800','2400'),'absent','今日機休',80)}if(d.ship_leave_today.includes(id)){push(timed(ds,'0600','0800'),'callable','今日船休待離營',60);push(timed(ds,'0800','2400'),'absent','今日船休',80)}if(d.night_leave_today.includes(id)){push(timed(ds,'0600','0800'),'callable','夜航待離營',60);push(timed(ds,'0800','2400'),'absent','夜航',80)}if(d.flight_today.includes(id))push(timed(ds,'0000','2400'),'absent','今日機收',80);if(d.ship_today.includes(id))push(timed(ds,'0000','2400'),'absent','今日船收',80);if(d.flight_yesterday.includes(id)){push(timed(ds,'0000','0600'),'absent','昨日機收',80);push(timed(ds,'0600','0740'),'callable','機收待收假',60)}if(d.ship_yesterday.includes(id)){push(timed(ds,'0000','0600'),'absent','昨日船收',80);push(timed(ds,'0600','1000'),'callable','船收待收假',60)}return a}
+function manpowerSlots(){const n=settings.manpower.span*60/settings.manpower.grain,start=new Date(currentDate+'T00:00:00').getTime();return Array.from({length:n},(_,i)=>[start+i*settings.manpower.grain*60000,start+(i+1)*settings.manpower.grain*60000])}
+function timelineLabel(ms){const d=new Date(ms);return String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+(d.getMinutes()?':'+String(d.getMinutes()).padStart(2,'0'):'')}
+function compactTimeLabel(ms){const d=new Date(ms);return d.getMinutes()?String(d.getMinutes()).padStart(2,'0'):String(d.getHours()).padStart(2,'0')}
+function wholeDayAbsent(p,ds){const id=personId(p),d=dayData(ds).special;return['leave_home','leave_local','training','recruitment','flight_today','ship_today'].some(k=>d[k].includes(id))}
+function renderPersonTimeline(){availabilityEventsCache=new Map();const slots=manpowerSlots(),all=allNamedPeople().filter(p=>!p.ignore).sort((a,b)=>(a.rosterOrder??a.index)-(b.rosterOrder??b.index)),people=all.filter(p=>!wholeDayAbsent(p,currentDate)).concat(all.filter(p=>wholeDayAbsent(p,currentDate))),cols='68px repeat('+slots.length+',22px)',dateGroups=[];slots.forEach(([s])=>{const d=new Date(s),key=ymd(d),last=dateGroups.at(-1);if(last?.key===key)last.count++;else dateGroups.push({key,count:1,label:String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')})});let dates='<div class="timelineRow timelineHead timelineDateRow" style="grid-template-columns:'+cols+'"><div class="timelineName">日期</div>'+dateGroups.map(x=>'<div class="timelineDateCell" style="grid-column:span '+x.count+'">'+x.label+'</div>').join('')+'</div>',times='<div class="timelineRow timelineHead timelineTimeRow" style="grid-template-columns:'+cols+'"><div class="timelineName">人員</div>'+slots.map(([s])=>{const half=new Date(s).getMinutes()!==0;return'<div class="timelineCell timelineTimeCell '+(half?'halfHour':'fullHour')+'">'+compactTimeLabel(s)+'</div>'}).join('')+'</div>',h=dates+times;people.forEach(p=>{const absent=wholeDayAbsent(p,currentDate);h+='<div class="timelineRow '+(absent?'timelineAbsent':'')+'" style="grid-template-columns:'+cols+'"><div class="timelineName">'+escapeHtml(p.name)+'</div>'+slots.map(([s,e])=>{const a=aggregatePerson(personId(p),s,e);let kind=a.kind;const hour=new Date(s).getHours();if(kind==='green'&&(hour>=22||hour<6))kind='sleep';return'<button class="timelineCell state-'+kind+'" data-timeline-person="'+escapeAttr(personId(p))+'" data-timeline-time="'+s+'" title="'+escapeAttr(a.reasons.join('、'))+'"></button>'}).join('')+'</div>'});document.getElementById('personTimeline').innerHTML=h;availabilityEventsCache=null}
+function renderManpowerTimeline(){availabilityEventsCache=new Map();const slots=manpowerSlots(),people=allNamedPeople().filter(p=>!p.ignore).sort((a,b)=>(a.rosterOrder??a.index)-(b.rosterOrder??b.index)),order={green:0,standby:1,yellow:2,callable:3,blue:4,guard:5,duty:6};document.getElementById('manpowerTimeline').innerHTML='<div class="availabilityBoard">'+slots.map(([s,e])=>{const shown=people.map((p,i)=>({p,i,state:aggregatePerson(personId(p),s,e).kind})).filter(x=>x.state!=='absent').sort((a,b)=>(order[a.state]??9)-(order[b.state]??9)||a.i-b.i),d=new Date(s),date=String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0'),time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');return'<div class="availabilityColumn"><div class="availabilityTime"><span>'+date+'</span><strong>'+time+'</strong></div>'+(shown.map(x=>'<button class="availabilityName state-'+x.state+'" data-availability-person="'+escapeAttr(personId(x.p))+'" data-availability-time="'+s+'">'+escapeHtml(x.p.name)+'</button>').join('')||'<div class="availabilityEmpty">無人員</div>')+'</div>'}).join('')+'</div>';availabilityEventsCache=null}
+function renderOutside(){const d=dayData(currentDate),next=dayData(addDays(currentDate,1)),allowed=[],blocked=[],islandExempt=[],leaveExempt=[],leaveKeys=['leave_home','leave_local','training','recruitment','flight_leave_today','ship_leave_today','night_leave_today','flight_today','ship_today'],evening=timed(currentDate,'1800','2200');allNamedPeople().filter(p=>!p.ignore).forEach(p=>{const id=personId(p),leaveKey=leaveKeys.find(k=>d.special[k].includes(id));if(leaveKey){leaveExempt.push([p,SPECIAL_ZONES[leaveKey]]);return}const reasons=[];if(p.noOutside)reasons.push('無外散');if(d.special.overnight.includes(id))reasons.push('外宿（獨立資格）');if(d.special.standby.includes(id))reasons.push('待命班');if(next.guards.some(g=>(g.personId?g.personId===id:g.person===p.name)&&g.type==='夜哨'))reasons.push('明日夜哨');const eveningGuard=d.guards.some(g=>{if(g.personId?g.personId!==id:g.person!==p.name)return false;const off=Number(settings.guardPoints?.[g.guardPoint]?.offset)||0,delta=Math.round(off*60)*60000;return g.start+delta<evening[1]&&evening[0]<g.end+delta});if(eveningGuard)reasons.push('今日18–22衛哨');if(reasons.length)blocked.push([p,reasons]);else if(d.special.island_pm.includes(id)||d.special.island_full.includes(id))islandExempt.push([p,d.special.island_full.includes(id)?'全島':'下半島']);else allowed.push(p)});document.getElementById('outsideResult').innerHTML='<div class="card outsideGroup"><div class="sectionTitle"><span>今日外散名單</span><span>'+manpowerCountText(allowed.map(personId))+'</span></div><div class="controlChips">'+allowed.map(p=>personChip(p,'','span')).join('')+'</div></div><div class="card outsideGroup"><div class="sectionTitle r">禁止外散・'+blocked.length+'員</div>'+blocked.map(([p,r])=>'<div>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+' <span class="outsideReason">'+escapeHtml(r.join('、'))+'</span></div>').join('')+'</div><div class="card outsideGroup"><div class="sectionTitle y">島休資格免列・'+islandExempt.length+'員</div>'+islandExempt.map(([p,r])=>'<div>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'｜'+r+'</div>').join('')+'</div><div class="card outsideGroup"><div class="sectionTitle">休假／任務免列・'+leaveExempt.length+'員</div>'+leaveExempt.map(([p,r])=>'<div>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'｜'+r+'</div>').join('')+'</div>'}
+const baseRenderOutside=renderOutside;
+renderOutside=function(){
+  const d=dayData(currentDate),next=dayData(addDays(currentDate,1)),allowed=[],blocked=[],islandExempt=[],leaveExempt=[],leaveKeys=['leave_home','leave_local','training','recruitment','flight_leave_today','ship_leave_today','night_leave_today','flight_today','ship_today'],evening=timed(currentDate,'1800','2200');
+  allNamedPeople().filter(p=>!p.ignore).forEach(p=>{const id=personId(p),leaveKey=leaveKeys.find(k=>d.special[k].includes(id));if(leaveKey){leaveExempt.push([p,SPECIAL_ZONES[leaveKey]]);return}const reasons=[];if(p.noOutside)reasons.push('無外散');if(d.special.overnight.includes(id))reasons.push('外宿（獨立資格）');if(d.special.standby.includes(id))reasons.push('待命班');if(d.special.duty_watch.includes(id))reasons.push('值星');if(next.guards.some(g=>(g.personId?g.personId===id:g.person===p.name)&&g.type==='夜哨'))reasons.push('明日夜哨');const eveningGuard=d.guards.some(g=>{if(g.personId?g.personId!==id:g.person!==p.name)return false;const off=Number(settings.guardPoints?.[g.guardPoint]?.offset)||0,delta=Math.round(off*60)*60000;return g.start+delta<evening[1]&&evening[0]<g.end+delta});if(eveningGuard)reasons.push('今日18–22衛哨');if(reasons.length)blocked.push([p,reasons]);else if(d.special.island_pm.includes(id)||d.special.island_full.includes(id))islandExempt.push([p,d.special.island_full.includes(id)?'全島':'下半島']);else allowed.push(p)});
+  document.getElementById('outsideResult').innerHTML='<div class="card outsideGroup"><div class="sectionTitle"><span>今日外散名單</span><span>'+manpowerCountText(allowed.map(personId))+'</span></div><div class="controlChips">'+allowed.map(p=>personChip(p,'','span')).join('')+'</div></div><div class="card outsideGroup"><div class="sectionTitle r">禁止外散・'+blocked.length+'員</div>'+blocked.map(([p,r])=>'<div>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+' <span class="outsideReason">'+escapeHtml(r.join('、'))+'</span></div>').join('')+'</div><div class="card outsideGroup"><div class="sectionTitle y">島休資格免列・'+islandExempt.length+'員</div>'+islandExempt.map(([p,r])=>'<div>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'｜'+r+'</div>').join('')+'</div><div class="card outsideGroup"><div class="sectionTitle">休假／任務免列・'+leaveExempt.length+'員</div>'+leaveExempt.map(([p,r])=>'<div>'+escapeHtml((p.rank?p.rank+' ':'')+p.name)+'｜'+r+'</div>').join('')+'</div>';
+};
+function showTimelineDetail(title,lines){document.getElementById('timelineDetailTitle').textContent=title;document.getElementById('timelineDetailBody').innerHTML=lines.map(x=>'<div class="controlChip plainChip" style="margin:3px">'+escapeHtml(x)+'</div>').join('')||'無';document.getElementById('timelineDetailModal').classList.add('show')}
+function renderNewPages(){renderManpowerControl();renderOutside();if(document.getElementById('personTimelinePage').classList.contains('active'))renderPersonTimeline();if(document.getElementById('manpowerTimelinePage').classList.contains('active'))renderManpowerTimeline()}
+function hhmmNow(){const d=new Date();return String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')}
+function cleanHHMM(v){v=String(v||'').replace(/\D/g,'').slice(0,4);if(v.length!==4)return null;const h=+v.slice(0,2),m=+v.slice(2);return(h>23||m>59)?null:{h,m}}
+function rollAwayCategory(id,base){const d=dayData(currentDate).special,minute=Math.floor((base-new Date(currentDate+'T00:00:00').getTime())/60000),rules=[['leave_home','返台休',0,1440],['leave_local','在馬休',0,1440],['training','受訓',0,1440],['recruitment','招募',0,1440],['flight_leave_today','今日機休',360,1440],['ship_leave_today','今日船休',360,1440],['night_leave_today','夜航',360,1440],['flight_today','今日機收',0,1440],['ship_today','今日船收',0,1440],['flight_yesterday','昨日機收',0,460],['ship_yesterday','昨日船收',0,600]];for(const[k,label,s,e]of rules)if(d[k].includes(id)&&minute>=s&&minute<e)return{group:label,note:''};return null}
+function rollNearEmoji(name,base){const ev=manpowerEvents(name,addDays(currentDate,-1),addDays(currentDate,1)).filter(x=>x.assignment),ended=ev.filter(x=>x.e<=base&&base-x.e<=15*60000).sort((a,b)=>b.e-a.e)[0],up=ev.filter(x=>x.s>base&&x.s-base<=15*60000).sort((a,b)=>a.s-b.s)[0];return ended?'↩️':up?'⏳':''}
+function rollHeader(title,rows,groups){const ids=rows.map(x=>personId(x.p)),sub=groups.length?'<div class="rollStatsLines">'+groups.map(g=>'<div>'+escapeHtml(g.name)+' '+manpowerCountText(g.rows.map(x=>personId(x.p)))+'</div>').join('')+'</div>':'';return title+' '+manpowerCountText(ids)+sub}
+function rollIncidentGroup(r){if(r.kind==='guard')return'衛哨';if(r.kind==='blue')return'補休';if(r.kind==='duty')return String(r.reason||'勤務').replace(/\s+\d{1,4}-\d{1,4}.*$/,'')||'勤務';return r.reason||'其他事故'}
+function rollAwayHeader(rows){const by=name=>rows.filter(x=>x.group===name),training=by('受訓'),recruit=by('招募'),vacationNames=['今日機休','今日船休','返台休','今日機收','今日船收'],vacation=rows.filter(x=>vacationNames.includes(x.group)),taiwan=[...training,...recruit,...vacation],returning=rows.filter(x=>['昨日機收','昨日船收'].includes(x.group)),lines=[['在台',taiwan,''],['受訓',training,''],['招募',recruit,''],['休假',vacation,'']];vacationNames.forEach(n=>lines.push([n,by(n),'rollSubLayer']));if(returning.length)lines.push(['待收假',returning,'']);const local=by('在馬休');if(local.length)lines.push(['在馬休',local,'']);return'返台區 '+manpowerCountText(rows.map(x=>personId(x.p)))+'<div class="rollStatsLines">'+lines.filter(x=>x[1].length).map(([n,a,c])=>'<div class="'+c+'">'+n+' '+manpowerCountText(a.map(x=>personId(x.p)))+'</div>').join('')+'</div>'}
+function renderRollSection(target,rows,grouped=false){const el=document.getElementById(target);if(!rows.length){el.innerHTML='<div class="rollEmpty">目前無人員</div>';return[]}const groups=[];if(grouped){rows.forEach(x=>{let g=groups.find(q=>q.name===x.group);if(!g){g={name:x.group,rows:[]};groups.push(g)}g.rows.push(x)})}else groups.push({name:'',rows});el.innerHTML=groups.map(g=>(g.name?'<div class="rollGroupTitle">'+escapeHtml(g.name)+'｜'+manpowerCountText(g.rows.map(x=>personId(x.p)))+'</div>':'')+g.rows.map(x=>'<div class="rollPerson state-'+x.kind+(dayData(currentDate).checks[personId(x.p)]?' checked':'')+'" data-checkperson="'+escapeAttr(personId(x.p))+'"><span>'+escapeHtml(x.p.name)+(target==='rollIncident'?'：':'')+'</span><span class="statusline">'+escapeHtml([x.note,x.emoji,x.conflict?'⚠️':''].filter(Boolean).join(' '))+'</span></div>').join('')).join('');return groups}
+function incidentTimeNote(r){const spans=r.events.filter(e=>e.assignment&&e.kind===r.kind).map(e=>shortRange(e.s,e.e));return[...new Set(spans)].join('、')||r.reason}
+function renderRollcall(){
+ const q=cleanHHMM(document.getElementById('rollTime').value);if(!q){showToast('時間格式請輸入 HHMM');return}
+ const base=absMs(currentDate,q.h+q.m/60),zones={stay:[],incident:[],away:[]};availabilityEventsCache=new Map();
+ allNamedPeople().filter(p=>!p.ignore).sort((a,b)=>(a.rosterOrder??a.index)-(b.rosterOrder??b.index)).forEach(p=>{
+  const id=personId(p),r=resolvedPerson(id,base),events=r.events,red=events.filter(e=>e.assignment&&['guard','duty'].includes(e.kind)),blue=events.filter(e=>e.kind==='blue'),yellow=events.filter(e=>e.assignment&&['yellow','standby'].includes(e.kind)),island=rollIslandCategory(id,base),away=rollAwayCategory(id,base),common={p,emoji:rollNearEmoji(id,base),conflict:r.conflict};
+  const labels=items=>[...new Set(items.map(e=>e.reason+' '+shortRange(e.s,e.e)))].join('、');
+  if(away&&events.some(e=>e.kind==='absent')){zones.away.push({...common,group:away.group,note:'',kind:'absent'});return}
+  if(red.length){const guard=red.find(e=>e.kind==='guard'),lead=guard||red[0],group=guard?'衛哨':lead.reason||'勤務',note=guard?[...new Set(red.map(e=>e.kind==='guard'?e.reason.replace(/^衛哨\s*/, ''):e.reason+' '+shortRange(e.s,e.e)))].join('、'):labels(red);zones.incident.push({...common,group,note,kind:lead.kind});return}
+  if(blue.length){zones.incident.push({...common,group:'補休',note:labels(blue).replace(/(?:衛哨)?補休\s*/g,''),kind:'blue'});return}
+  if(yellow.length){zones.stay.push({...common,group:'應到',note:labels(yellow),kind:yellow.some(e=>e.kind==='standby')?'standby':'yellow'});return}
+  if(island){zones.incident.push({...common,group:island.group==='全島'?'島休':island.group,note:island.note,kind:island.kind||'callable'});return}
+  if(away){zones.away.push({...common,group:away.group,note:'',kind:'absent'});return}
+  if(r.kind==='callable'||r.kind==='overnight'){zones.incident.push({...common,group:'限制調度',note:r.reason,kind:r.kind});return}
+  zones.stay.push({...common,group:'應到',note:'',kind:'green'});
+ });
+ const incidentOrder=g=>g==='補休'?0:g==='衛哨'?1:SYSTEMS.some(x=>x.name===g)?2:g==='上半島'?4:g==='下半島'?5:g==='島休'?6:g==='外宿'?7:g==='限制調度'?8:3;zones.incident.sort((a,b)=>incidentOrder(a.group)-incidentOrder(b.group));
+ availabilityEventsCache=null;const incidentGroups=renderRollSection('rollIncident',zones.incident,true);renderRollSection('rollStay',zones.stay);renderRollSection('rollAway',zones.away,true);document.getElementById('rollIsland').innerHTML='';document.getElementById('rollStayHead').innerHTML=rollHeader('應到區',zones.stay,[]);document.getElementById('rollIncidentHead').innerHTML=rollHeader('事故區',zones.incident,incidentGroups);document.getElementById('rollAwayHead').innerHTML=rollAwayHeader(zones.away);document.getElementById('rollSummary').innerHTML='<span class="badge g">應到 '+zones.stay.length+'</span><span class="badge r">事故 '+zones.incident.length+'</span><span class="badge">返台 '+zones.away.length+'</span><span class="badge">總 '+(zones.stay.length+zones.incident.length+zones.away.length)+'</span>';
+}
+function renderSettings(){
+  document.getElementById('guardPointCount').value=settings.guardPointCount;
+  const gs=document.getElementById('guardSettings');gs.innerHTML='';
+  settings.guardPoints.forEach((gp,g)=>{
+    const c=document.createElement('div');c.className='card';
+    let h='<div class="inline"><strong>哨點'+(g+1)+'</strong><input data-gp-name="'+g+'" value="'+escapeAttr(gp.name||'')+'" placeholder="名稱"><label>偏移量 <input data-gp-offset="'+g+'" type="number" step="0.25" value="'+escapeAttr(gp.offset??0)+'" placeholder="0"></label></div>';
+    h+='<table class="settingTable"><thead><tr><th>始</th><th>末</th><th>類型</th><th>補休</th></tr></thead><tbody>';
+    for(let i=0;i<12;i++){
+      const sh=gp.shifts[i]||{start:'',end:'',type:'日哨',restPaint:{}};
+      h+='<tr><td><input data-sh="'+g+':'+i+':start" value="'+sh.start+'"></td><td><input data-sh="'+g+':'+i+':end" value="'+sh.end+'"></td>'+
+      '<td><select data-sh="'+g+':'+i+':type"><option '+(sh.type==='日哨'?'selected':'')+'>日哨</option><option '+(sh.type==='夜哨'?'selected':'')+'>夜哨</option><option '+(sh.type==='艱苦哨'?'selected':'')+'>艱苦哨</option></select></td><td><button type="button" title="設定此班全域補休" data-guard-rest="'+g+':'+i+'">💤</button></td></tr>';
+    }
+    h+='</tbody></table>';c.innerHTML=h;gs.appendChild(c);
+  });
+  const ds=document.getElementById('dutySettingSelect');ds.innerHTML=settings.duties.map((d,i)=>'<option value="'+i+'">'+(d.systemKey?'S'+(i+1):String(i-SYSTEMS.length+1))+'. '+escapeHtml(d.name)+'</option>').join('');
+  renderDutySettingEditor(+ds.value||0);
+
+  renderPersonnelSettings();
+}
+let paintTool='red',paintDragging=false;
+function renderDutySettingEditor(idx){const d=settings.duties[idx];if(!d)return;document.getElementById('dutySettingName').value=d.name;document.getElementById('dutySettingName').disabled=!!d.systemKey;document.getElementById('systemTemplatePeriod').hidden=d.systemKey!=='meal_ride';document.getElementById('dutySettingOutside').checked=!!d.outside;const view=document.getElementById('dutyPaintView').value||'regular',bounds={regular:[-180,1440],tomorrow:[-180,1920],full:[-1440,2880]}[view],box=document.getElementById('dutyMask');box.innerHTML='';for(let minute=bounds[0];minute<bounds[1];minute+=60){const dayOffset=Math.floor(minute/1440),clock=((minute%1440)+1440)%1440,label=document.createElement('div');label.className='paintLabel';label.textContent=(dayOffset<0?'昨':dayOffset>0?'明':'今')+String(Math.floor(clock/60)).padStart(2,'0')+'00';box.appendChild(label);for(let q=0;q<6;q++){const absolute=minute+q*10,slot=Math.round((absolute+1440)/10),b=document.createElement('button'),state=selectedTemplatePaint(d)?.[slot]||'clear',prefix=dayOffset<0?'昨':dayOffset>0?'明':'今',hh=String(Math.floor(clock/60)).padStart(2,'0'),mm=String(q*10).padStart(2,'0');b.type='button';b.className='paintCell '+state;b.dataset.paintSlot=slot;b.textContent=prefix+hh+mm;b.title=b.textContent+'｜'+(state==='clear'?'綠色':state);box.appendChild(b)}}document.querySelectorAll('[data-paint-tool]').forEach(x=>x.classList.toggle('on',x.dataset.paintTool===paintTool))}
+function paintDutyCell(el){const idx=+document.getElementById('dutySettingSelect').value,slot=+el.dataset.paintSlot,d=settings.duties[idx];const paint=selectedTemplatePaint(d);if(paintTool==='clear')delete paint[slot];else paint[slot]=paintTool;el.className='paintCell '+(paint[slot]||'clear');saveSettings();renderSchedule()}
+let guardRestTarget=null,guardRestDragging=false,guardRestPaintValue=true;
+function guardRestEvents(ds,g){const out=[],paint=settings.guardPoints?.[g.guardPoint]?.shifts?.[g.slot]?.restPaint;if(paint&&Object.keys(paint).length){let run=null;for(let i=0;i<=432;i++){const on=i<432&&paint[i];if(on&&run===null)run=i;if(!on&&run!==null){out.push({s:absMs(ds,-24+run/6),e:absMs(ds,-24+i/6),kind:'blue',reason:'衛哨補休',priority:55});run=null}}}return out}
+function guardRestShift(){if(!guardRestTarget)return null;const[g,s]=guardRestTarget,sh=settings.guardPoints?.[g]?.shifts?.[s];if(sh&&!sh.restPaint)sh.restPaint={};return sh}
+function openGuardRest(g,s){guardRestTarget=[g,s];const sh=guardRestShift();if(!sh)return;document.getElementById('guardRestTitle').textContent=(settings.guardPoints[g]?.name||'哨點')+'｜'+fmtShift(currentDate,Number(sh.start)||0,Number(sh.end)||0)+'｜全域補休';renderGuardRest();document.getElementById('guardRestModal').classList.add('show')}
+function renderGuardRest(){const sh=guardRestShift();if(!sh)return;const view=document.getElementById('guardRestView').value,bounds={regular:[-180,1440],tomorrow:[-180,1920],full:[-1440,2880]}[view],box=document.getElementById('guardRestGrid');box.innerHTML='';for(let minute=bounds[0];minute<bounds[1];minute+=60){const dayOffset=Math.floor(minute/1440),clock=((minute%1440)+1440)%1440,prefix=dayOffset<0?'昨':dayOffset>0?'明':'今',hh=String(Math.floor(clock/60)).padStart(2,'0'),l=document.createElement('div');l.className='paintLabel';l.textContent=prefix+hh+'00';box.appendChild(l);for(let q=0;q<6;q++){const slot=Math.round((minute+q*10+1440)/10),b=document.createElement('button');b.className='paintCell '+(sh.restPaint?.[slot]?'blue':'clear');b.dataset.guardRestSlot=slot;b.textContent=prefix+hh+String(q*10).padStart(2,'0');box.appendChild(b)}}}
+function paintGuardRest(el,value=guardRestPaintValue){const sh=guardRestShift(),slot=+el.dataset.guardRestSlot;if(!sh)return;if(value)sh.restPaint[slot]=true;else delete sh.restPaint[slot];el.className='paintCell '+(sh.restPaint[slot]?'blue':'clear');saveSettings()}
+let dailyDutyTarget=null,dailyDutyTool='red',dailyDutyDragging=false;
+function openDailyDuty(i){systemTimeTarget=null;document.getElementById('dailyDutyName').disabled=false;const rec=dayData(currentDate).duties[i];if(!rec||rec.dutyIndex===null){showToast('請先選擇勤務');return}if(!rec.paint)rec.paint=JSON.parse(JSON.stringify(settings.duties[rec.dutyIndex]?.paint||{}));if(!rec.name)rec.name=settings.duties[rec.dutyIndex]?.name||'勤務';dailyDutyTarget=i;document.getElementById('dailyDutyName').value=rec.name;renderDailyDuty();document.getElementById('dailyDutyModal').classList.add('show')}
+function renderDailyDuty(){if(dailyDutyTarget===null&&!systemTimeTarget)return;const rec=activeDailyRecord(),view=document.getElementById('dailyDutyView').value,bounds={regular:[-180,1440],tomorrow:[-180,1920],full:[-1440,2880]}[view],box=document.getElementById('dailyDutyGrid');box.innerHTML='';for(let minute=bounds[0];minute<bounds[1];minute+=60){const dayOffset=Math.floor(minute/1440),clock=((minute%1440)+1440)%1440,prefix=dayOffset<0?'昨':dayOffset>0?'明':'今',hh=String(Math.floor(clock/60)).padStart(2,'0'),l=document.createElement('div');l.className='paintLabel';l.textContent=prefix+hh+'00';box.appendChild(l);for(let q=0;q<6;q++){const slot=Math.round((minute+q*10+1440)/10),b=document.createElement('button'),state=rec.paint?.[slot]||'clear';b.className='paintCell '+state;b.dataset.dailySlot=slot;b.textContent=prefix+hh+String(q*10).padStart(2,'0');box.appendChild(b)}}document.querySelectorAll('[data-daily-tool]').forEach(x=>x.classList.toggle('on',x.dataset.dailyTool===dailyDutyTool))}
+function paintDailyDuty(el){const rec=activeDailyRecord(),slot=+el.dataset.dailySlot;if(dailyDutyTool==='clear')delete rec.paint[slot];else rec.paint[slot]=dailyDutyTool;el.className='paintCell '+(rec.paint[slot]||'clear');saveSchedule()}
+let textExportLines=[];
+function rocDateLabel(ds){const d=new Date(ds+'T12:00:00'),w='日一二三四五六'[d.getDay()];return(d.getFullYear()-1911)+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+'（'+w+'）'}
+function exportClock(v){const total=Math.round(Number(v)*60);if(total===1440)return'24';const normal=((total%1440)+1440)%1440,h=Math.floor(normal/60),m=normal%60;return String(h).padStart(2,'0')+(m?String(m).padStart(2,'0'):'')}
+function exportPerson(id,rank=true){const p=personById(id);return p?(rank?(p.rank||''):'')+p.name:''}
+function exportIds(keys){const wanted=new Set(keys.flatMap(k=>dayData(currentDate).special[k]||[]));return settings.people.filter(p=>p.name&&!p.ignore&&wanted.has(personId(p))).sort((a,b)=>(a.rosterOrder??99999)-(b.rosterOrder??99999)).map(personId)}
+function buildTextExportLines(){
+  const dd=dayData(currentDate),lines=[],add=(text,group,start=false)=>{if(String(text||'').trim())lines.push({text:String(text),group,start})},block=(title,entries,group)=>{if(!entries.length)return;add(title,group,true);entries.forEach(x=>add(x,group))};
+  add(rocDateLabel(currentDate),'date',true);
+  settings.guardPoints.slice(0,settings.guardPointCount).forEach((gp,g)=>{const entries=(gp.shifts||[]).slice(0,12).map((sh,s)=>{const rec=dd.guards.find(x=>x.guardPoint===g&&x.slot===s);if(!rec?.person)return'';const p=personByName(rec.person);return exportClock(sh.start)+exportClock(sh.end)+(p?(p.rank||'')+p.name:rec.person)}).filter(Boolean);block(gp.name||('哨點'+(g+1)),entries,'guard-'+g)});
+  for(const def of SYSTEMS){const groups=new Map();for(const x of systemAssignments(currentDate,def.key)){const key=x.period;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(exportPerson(x.personId,false))}for(const [period,people]of groups)if(people.length)add(def.name+(MEALS[period]?'・'+MEALS[period]:period==='am'?'・1400前':period==='pm'?'・1400後':'')+'：'+people.join('、'),'system',true)}
+  let firstDuty=true;(dd.duties||[]).forEach((rec,i)=>{if(rec.dutyIndex===null||rec.dutyIndex===undefined)return;const names=dutyNames(rec);if(names.length){add((rec.name||settings.duties[rec.dutyIndex]?.name||('勤務'+(i+1)))+'：'+names.join('、'),'duties',firstDuty);firstDuty=false}});
+  [['外宿',['overnight']],['上半島',['island_am']],['下半島',['island_pm']],['全島',['island_full']],['返台',['leave_home']],['機休',['flight_leave_today']],['船休',['ship_leave_today']],['夜航',['night_leave_today']],['機收',['flight_today']],['船收',['ship_today']],['受訓',['training']],['招募',['recruitment']],['在馬休',['leave_local']]].forEach(([title,keys])=>{const names=exportIds(keys).map(id=>exportPerson(id,false));if(names.length)add(title+'：'+names.join('、'),'special-'+title,true)});
+  return lines
+}
+function openTextExport(){ensureGuardRecords();textExportLines=buildTextExportLines();const box=document.getElementById('textExportList');box.innerHTML=textExportLines.map((x,i)=>'<label class="textExportLine '+(x.start?'textExportGroupStart':'')+'"><input type="checkbox" data-text-export-line="'+i+'" checked><span>'+escapeHtml(x.text)+'</span></label>').join('')||'<div class="small">本日沒有可匯出的勤務資料。</div>';document.getElementById('systemMenuModal').classList.remove('show');document.getElementById('textExportSelectModal').classList.add('show')}
+function composeTextExport(){const chosen=[...document.querySelectorAll('[data-text-export-line]:checked')].map(x=>textExportLines[+x.dataset.textExportLine]).filter(Boolean),out=[];let last='';chosen.forEach(x=>{if(last&&x.group!==last)out.push('');out.push(x.text);last=x.group});return out.join('\n')}
+async function copyTextExport(){const area=document.getElementById('textExportEditor'),value=area.value;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(value);else{area.focus();area.select();if(!document.execCommand('copy'))throw new Error('copy failed')}showToast('已複製到剪貼簿')}catch(e){area.focus();area.select();showToast('無法自動複製，文字已全選') }}
+
+// 313 and 313 edit the same leaveConfig.nameAliases document.
+function openDutyAliases(){const aliases=settings.nameAliases||{};document.getElementById('dutyAliasList').innerHTML=allNamedPeople().filter(p=>p.personId).map(p=>'<label class="quickPerson"><span>'+escapeHtml(p.name)+'</span><input data-alias-id="'+escapeAttr(p.personId)+'" value="'+escapeAttr(aliases[p.personId]||'')+'" placeholder="'+escapeAttr(Array.from(p.name).slice(-2).join(''))+'"></label>').join('');document.getElementById('systemMenuModal').classList.remove('show');document.getElementById('dutyAliasModal').classList.add('show')}
+document.getElementById('openDutyAliases').onclick=openDutyAliases;
+document.getElementById('saveDutyAliases').onclick=async()=>{const aliases={};document.querySelectorAll('#dutyAliasList [data-alias-id]').forEach(x=>{if(x.value.trim())aliases[x.dataset.aliasId]=x.value.trim().slice(0,12)});settings.nameAliases=aliases;if(await saveSettings()){document.getElementById('dutyAliasModal').classList.remove('show');showToast('姓名轉譯表已保存')}};
+const LINE_SYSTEMS={'日帶':'day_agent','日代':'day_agent','值星':'duty_watch','幫廚':'kitchen_help','待命班':'standby','早上打飯班':'meal_am','中午打飯班':'meal_noon','晚上打飯班':'meal_pm'};
+let lineDraft=null;
+function linePersonCandidates(raw){const value=raw.trim().replace(/^(?:少將|中將|上將|少校|中校|上校|少尉|中尉|上尉|上士|中士|下士|上兵|一兵|二兵|士官長)/,'');const aliases=settings.nameAliases||{};let matches=allNamedPeople().filter(p=>p.personId&&p.name===value);if(!matches.length)matches=allNamedPeople().filter(p=>p.personId&&(aliases[p.personId]===value||Array.from(p.name).slice(-2).join('')===value));return matches.length===1?matches[0].personId:''}
+function parseLineText(text){
+ const lines=text.replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean),dateLine=lines.find(x=>/(?:\d{3}\s*[／/]\s*\d{1,2}\s*[／/]\s*\d{1,2}|\d{7}行動準據)/.test(x));
+ let date='';
+ if(dateLine){const m=dateLine.match(/(\d{3})\s*[／/]\s*(\d{1,2})\s*[／/]\s*(\d{1,2})/)||dateLine.match(/(\d{3})(\d{2})(\d{2})行動準據/);date=String(+m[1]+1911)+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');if(ymd(new Date(date+'T12:00:00'))!==date)throw Error('文字中的日期無效')}
+ const entries=[];let heading='',action=false,mealSeen=new Set(),rideSeen=new Set(),guardOrder=new Map();
+ const add=(kind,target,name,label,slot='')=>entries.push({kind,target,name:name.trim(),label,slot,personId:linePersonCandidates(name)});
+ const ridePeriod=minutes=>minutes>=300&&minutes<=480?'breakfast':minutes>=600&&minutes<=780?'lunch':minutes>=960&&minutes<=1140?'dinner':'';
+ for(let i=0;i<lines.length;i++){
+  let line=lines[i];
+  if(/行動準據/.test(line)){action=true;heading='';continue}
+  const islandLine=line.match(/^島\s*休(?:\s*[：:︰]\s*(.*))?$/);
+  if(islandLine){heading='';let names=islandLine[1]||'';if(!names&&lines[i+1]&&!/^[^：:︰]+[：:︰]|行動準據|衛哨|^\d{4}/.test(lines[i+1]))names=lines[++i];names.split(/[、，,\s]+/).filter(Boolean).forEach(n=>add('island','island_full',n,'島休'));continue}
+  const rideMarker=line.match(/悍馬車(?:長)?駕(?:駛)?/);
+  if(rideMarker){const time=(lines[i-1]||'').match(/^(\d{4})/),minutes=time?+time[1].slice(0,2)*60+ +time[1].slice(2):NaN,period=ridePeriod(minutes);if(period&&!rideSeen.has(period)){const payload=line.slice((rideMarker.index||0)+rideMarker[0].length).replace(/^[、，,\s：:︰）)]+|[（()）]/g,'').trim(),name=payload.split(/[、，,\s]+/).filter(Boolean)[0];if(name){rideSeen.add(period);add('mealRide','meal_ride',name,'三餐跟車・'+MEALS[period],period)}}continue}
+  if(action){const t=line.match(/^(\d{4}).*撤收/);if(!t)continue;const hour=+t[1].slice(0,2)*60+ +t[1].slice(2),key=hour>=360&&hour<=480?'meal_am':hour>=660&&hour<=780?'meal_noon':hour>=1020&&hour<=1140?'meal_pm':'';if(!key||mealSeen.has(key))continue;let payload=(line.match(/[（(]([^）)]+)[）)]/)||[])[1]||'';if(!payload&&lines[i+1]&&/^[（(]/.test(lines[i+1]))payload=(lines[++i].match(/[（(]([^）)]+)[）)]/)||[])[1]||'';if(!payload)continue;mealSeen.add(key);payload.split(/[、，,\s]+/).filter(Boolean).forEach(name=>add('system',key,name,line));continue}
+ const h=line.match(/^(.+?衛哨)(?:[（(].*[）)])?$/);if(h){heading=h[1];continue}
+ const guard=line.match(/^(\d{4})(.+)$/);if(heading&&guard){const slot=guardOrder.get(heading)||0;guardOrder.set(heading,slot+1);add('guard',heading,guard[2],heading+' '+guard[1],slot);continue}
+ const field=line.match(/^([^：:]+)[：:]\s*(.*)$/);if(field){heading='';const title=field[1].trim(),payload=field[2];if(title==='島休'){payload.split(/[、，,\s]+/).filter(Boolean).forEach(n=>add('island','island_full',n,title));continue}const sys=LINE_SYSTEMS[title],duties=settings.duties.map((d,idx)=>({d,idx})).filter(x=>!x.d.systemKey&&x.d.name===title);if(sys||duties.length===1){const target=sys||'duty:'+duties[0].idx;let names=payload;if(sys==='standby'){for(let j=i+1;j<lines.length&&j<i+3;j++){if(/^[^：:]+[：:]|衛哨|行動準據|^\d{4}/.test(lines[j]))break;names+='、'+lines[j];i=j}}names.split(/[、，,\s]+/).filter(Boolean).forEach(n=>add(sys?'system':'duty',target,n,title));continue}payload.split(/[、，,\s]+/).filter(Boolean).forEach(n=>add('duty','',n,title));continue}
+ }
+ return{date,entries}}
+function renderLinePreview(){const box=document.getElementById('lineImportPreview'),draft=lineDraft;if(!draft)return;const people=allNamedPeople().filter(p=>p.personId&&!p.ignore),opts='<option value="">⚠️ 請選人</option>'+people.map(p=>'<option value="'+escapeAttr(p.personId)+'">'+escapeHtml(p.name+(p.businessNames?.length?'・'+p.businessNames.join('、'):''))+'</option>').join('');const targets='<option value="">⚠️ 指定勤務</option>'+settings.duties.map((d,i)=>d.systemKey?'':'<option value="duty:'+i+'">'+escapeHtml(d.name)+'</option>').join('');const warning=!draft.date?'⚠️ 文字沒有可辨識日期；將使用目前選擇的 '+currentDate+'。':draft.date!==currentDate?'⚠️ 文字日期 '+draft.date+' 與目前選擇的 '+currentDate+' 不同；確認後仍會寫入 '+currentDate+'。':'';box.innerHTML=(warning?'<p class="lineImportWarning">'+escapeHtml(warning)+'</p>':'')+'<p>套用日期：<strong>'+escapeHtml(currentDate)+'</strong>｜預覽 '+draft.entries.length+' 項。對不上的人員或勤務可修正；不需要的整筆可略過。</p>'+draft.entries.map((e,i)=>'<div class="linePreviewRow"><span>'+escapeHtml(e.label)+'：'+escapeHtml(e.name)+'</span>'+(e.kind==='guard'?'<select data-line-guard="'+i+'"><option value="">⚠️ 指定哨班</option>'+settings.guardPoints.slice(0,settings.guardPointCount).flatMap((g,gi)=>g.shifts.slice(0,12).map((sh,si)=>'<option value="'+gi+':'+si+'" '+(e.target===g.name&&e.slot===si?'selected':'')+'>'+escapeHtml(g.name)+' 第'+(si+1)+'班</option>')).join('')+'</select>':e.kind==='duty'?'<select data-line-target="'+i+'">'+targets.replace('value="'+escapeAttr(e.target)+'"','value="'+escapeAttr(e.target)+'" selected')+'</select>':'<span>'+escapeHtml(e.kind==='island'?'島休':e.kind==='mealRide'?e.label:settings.duties.find(d=>d.systemKey===e.target)?.name||e.target)+'</span>')+'<select data-line-person="'+i+'">'+opts.replace('value="'+escapeAttr(e.personId)+'"','value="'+escapeAttr(e.personId)+'" selected')+'</select><button type="button" data-line-remove="'+i+'" title="略過這筆">✕ 略過</button></div>').join('');document.getElementById('applyLineImport').hidden=!draft.entries.length}
+document.getElementById('openLineImport').onclick=()=>{lineDraft=null;document.getElementById('lineImportText').value='';document.getElementById('lineImportPreview').textContent='';document.getElementById('applyLineImport').hidden=true;document.getElementById('lineImportModal').classList.add('show')};
+document.getElementById('lineImportPreview').addEventListener('click',e=>{const btn=e.target.closest('[data-line-remove]');if(!btn||!lineDraft)return;lineDraft.entries.forEach((row,i)=>{row.personId=document.querySelector('[data-line-person=\"'+i+'\"]')?.value||'';if(row.kind==='guard'){const value=document.querySelector('[data-line-guard=\"'+i+'\"]')?.value||'';const [g,si]=value.split(':').map(Number);row.target=value&&settings.guardPoints[g]?settings.guardPoints[g].name:'';row.slot=value?si:''}if(row.kind==='duty')row.target=document.querySelector('[data-line-target=\"'+i+'\"]')?.value||''});lineDraft.entries.splice(+btn.dataset.lineRemove,1);renderLinePreview()});
+document.getElementById('parseLineImport').onclick=()=>{try{lineDraft=parseLineText(document.getElementById('lineImportText').value);renderLinePreview()}catch(err){lineDraft=null;document.getElementById('applyLineImport').hidden=true;document.getElementById('lineImportPreview').textContent=err.message}};
+document.getElementById('applyLineImport').onclick=async()=>{if(!lineDraft||!ops.canWrite())return;const date=currentDate;if(lineDraft.date&&lineDraft.date!==date&&!confirm('⚠️ 文字日期 '+lineDraft.date+' 與目前選擇的 '+date+' 不同。仍要寫入 '+date+' 嗎？'))return;const entries=lineDraft.entries.map((e,i)=>({...e,personId:document.querySelector('[data-line-person="'+i+'"]').value,target:e.kind==='guard'?document.querySelector('[data-line-guard="'+i+'"]').value:e.kind==='duty'?document.querySelector('[data-line-target="'+i+'"]').value:e.target}));const usable=entries.filter(e=>e.personId&&e.target),skipped=entries.length-usable.length;if(!usable.length){showToast('沒有可套用的完整資料');return}const guardTargets=usable.filter(e=>e.kind==='guard').map(e=>e.target);if(new Set(guardTargets).size!==guardTargets.length){showToast('同一哨班重複指定，請修正或略過');return}const old=schedule.days[date],day=structuredClone(old||{guards:[],duties:[],dutyCount:4,checks:{},special:{}});day.guards??=[];day.duties??=[];day.systems??={};const guardSlots=new Set(usable.filter(e=>e.kind==='guard').map(e=>e.target)),sysKeys=new Set(usable.filter(e=>e.kind==='system').map(e=>e.target)),dutyKeys=new Set(usable.filter(e=>e.kind==='duty').map(e=>e.target));day.guards=day.guards.filter(g=>!guardSlots.has(g.guardPoint+':'+g.slot));day.duties=day.duties.filter(d=>!dutyKeys.has('duty:'+d.dutyIndex));for(const k of sysKeys){day.systems[k]??={people:[],pmPeople:[],base:{breakfast:'',lunch:'',dinner:''},overrides:{}};day.systems[k].people=[]}
+ if(usable.some(e=>e.kind==='mealRide'))day.systems.meal_ride??={people:[],pmPeople:[],base:{breakfast:'',lunch:'',dinner:''},overrides:{}};
+ for(const e of usable){const p=personById(e.personId);if(e.kind==='guard'){const [g,si]=e.target.split(':').map(Number),sh=settings.guardPoints[g]?.shifts[si];if(!sh){showToast('哨班已變動，請重新解析');return}day.guards.push({guardPoint:g,slot:si,person:p.name,personId:e.personId,start:absMs(date,Number(sh.start)),end:absMs(date,Number(sh.end)),type:sh.type})}else if(e.kind==='system'){const arr=day.systems[e.target].people;if(!arr.includes(e.personId))arr.push(e.personId)}else if(e.kind==='mealRide'){day.systems.meal_ride.base[e.slot]=e.personId}else if(e.kind==='duty'){const idx=+e.target.slice(5),template=settings.duties[idx];let duty=day.duties.find(d=>d.dutyIndex===idx);if(!duty){duty=day.duties.find(d=>d.dutyIndex===null||d.dutyIndex===undefined);const value={dutyIndex:idx,name:template?.name||e.label,paint:structuredClone(template?.paint||{}),outside:!!template?.outside,people:[]};if(duty)Object.assign(duty,value);else{duty=value;day.duties.push(duty)}}if(!duty.people.some(x=>x.id===e.personId))duty.people.push({id:e.personId,name:p.name})}}
+ day.dutyCount=Math.max(Number(day.dutyCount)||0,day.duties.length);
+ const islandIds=[...new Set(usable.filter(e=>e.kind==='island').map(e=>e.personId))],islandChanges=[],nextIslands=structuredClone(ops.data.islands);if(usable.some(e=>e.kind==='island')){for(let i=nextIslands.length-1;i>=0;i--){const r=nextIslands[i];if(r.date===date&&r.type!=='overnight'&&r.status!=='cancelled'){islandChanges.push({store:'islandRecords',remove:r.id});nextIslands.splice(i,1)}}for(const personId of islandIds){const now=new Date().toISOString(),row={id:ShionSchema.recordId(personId,date,'island_full'),date,type:'island_full',pool:ops.data.islands.find(r=>r.personId===personId&&r.date===date&&r.type!=='overnight')?.pool||'island',purpose:'leave',source:'duty314',personId,status:'active',createdAt:now,updatedAt:now,createdBy:ops.actor(),updatedBy:ops.actor()};nextIslands.push(row);islandChanges.push({store:'islandRecords',value:row})}}
+ const stamp=new Date().toISOString();day.createdAt=day.createdAt||stamp;day.createdBy=day.createdBy||ops.actor();day.updatedAt=stamp;day.updatedBy=ops.actor();const canonical=structuredClone(day);canonical.island=[];if(canonical.special)for(const key of ['island_am','island_pm','island_full','overnight','standby','duty_watch'])delete canonical.special[key];if(await ops.write([{store:'dutyDays',value:{id:date,value:canonical}},...islandChanges])){schedule.days[date]=day;ops.data.days[date]=structuredClone(canonical);ops.data.islands=nextIslands;document.getElementById('lineImportModal').classList.remove('show');refreshAll();showToast('已套用 '+usable.length+' 筆'+(skipped?'，略過 '+skipped+' 筆未辨識項目':''))}};
+
+let dutyAnnualYear=+currentDate.slice(0,4),dutyAnnualScope='d1',dutyAnnualSize=3,dutyAnnualDetails=new Map();
+function dutyAnnualPeople(){return(ops.data.roster?.people||[]).filter(p=>p.name&&(dutyAnnualScope==='all'||p.departmentId==='d1')).sort((a,b)=>(a.rosterOrder??999999)-(b.rosterOrder??999999)||p.name.localeCompare(b.name,'zh-Hant'))}
+function dutyAnnualDates(){const dates=[];for(let m=1;m<=12;m++)for(let d=1,max=new Date(dutyAnnualYear,m,0).getDate();d<=max;d++)dates.push(dutyAnnualYear+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0'));return dates}
+function dutyAnnualClock(ms){const d=new Date(ms),h=d.getHours(),m=d.getMinutes();return h===0&&m===0?'24':String(h).padStart(2,'0')+(m?String(m).padStart(2,'0'):'')}
+function dutyAnnualIndex(dates){const index=new Map(),mark=(id,date,kind,label)=>{if(!id)return;const key=id+'|'+date;let r=index.get(key);if(!r){r={items:[],away:false,island:false};index.set(key,r)}if(kind==='away')r.away=true;else if(kind==='island')r.island=true;else r.items.push({kind,label})};const names=new Map();for(const p of ops.data.roster?.people||[]){const matches=names.get(p.name)||[];matches.push(p.id);names.set(p.name,matches)};
+ for(const date of dates){const d=schedule.days[date];if(!d)continue;for(const g of d.guards||[]){if(!g.person&&!g.personId)continue;const match=names.get(g.person)||[],id=g.personId||(match.length===1?match[0]:'');let start=+g.start,end=+g.end;if(!Number.isFinite(start)||!Number.isFinite(end)){const sh=settings.guardPoints[g.guardPoint]?.shifts[g.slot];if(!sh)continue;start=absMs(date,Number(sh.start));end=absMs(date,Number(sh.end))}mark(id,date,g.type==='艱苦哨'?'hard':'guard',dutyAnnualClock(start)+'-'+dutyAnnualClock(end))}
+ for(const key of ['day_agent','duty_watch']){const r=d.systems?.[key];if(!r)continue;for(const id of r.people||[])mark(id,date,key==='day_agent'?'agent':'watch',key==='day_agent'?'日代':r.handover?'值星上':'值星');if(key==='duty_watch'&&r.handover)for(const id of r.pmPeople||[])mark(id,date,'watch','值星下')}}
+ const first=dates[0],last=dates.at(-1);for(const r of ops.data.leaves||[]){if(!r.personId||!r.startDate||!r.endDate||r.endDate<first||r.startDate>last)continue;let day=r.startDate<first?first:r.startDate,limit=r.endDate>last?last:r.endDate;while(day<=limit){mark(r.personId,day,'away');day=addDays(day,1)}}for(const [key,stamp] of Object.entries(ops.data.leaveConfig?.annualStamps||{}))if(stamp==='local'){const at=key.lastIndexOf('|'),date=key.slice(at+1);if(date>=first&&date<=last)mark(key.slice(0,at),date,'away')}
+ for(const r of ops.data.islands||[])if(r.status==='active'&&r.type!=='overnight'&&r.date>=first&&r.date<=last)mark(r.personId,r.date,'island');return index}
+function renderDutyAnnual(){const canvas=document.getElementById('dutyAnnualCanvas'),scroll={x:canvas.scrollLeft,y:canvas.scrollTop},dates=dutyAnnualDates(),people=dutyAnnualPeople(),index=dutyAnnualIndex(dates);dutyAnnualDetails=index;document.getElementById('dutyAnnualYear').value=dutyAnnualYear;document.getElementById('dutyAnnualScope').value=dutyAnnualScope;document.getElementById('dutyAnnualSize').value=dutyAnnualSize;document.getElementById('dutyAnnualModal').dataset.size=dutyAnnualSize;document.getElementById('dutyAnnualStatus').textContent=dutyAnnualYear+'｜'+people.length+' 人';document.getElementById('dutyAnnualMonths').innerHTML=Array.from({length:12},(_,i)=>'<button type="button" data-duty-month="'+(i+1)+'">'+(i+1)+'月</button>').join('');let html='<table class="dutyAnnualTable"><thead><tr><th class="annualName">人員</th>'+dates.map(date=>'<th '+(date.endsWith('-01')?'data-duty-month-start="'+Number(date.slice(5,7))+'"':'')+'>'+date.slice(5).replace('-','/')+'</th>').join('')+'</tr></thead><tbody>';for(const p of people){html+='<tr><th class="annualName" title="'+escapeAttr(p.name)+'">'+escapeHtml(p.name)+'</th>';for(const date of dates){const c=index.get(p.id+'|'+date),items=c?.items||[],bg=c?.away?'away':c?.island?'island':'stay',details=items.map(x=>x.label).join('、');html+='<td class="'+bg+'"><button type="button" data-duty-annual-person="'+escapeAttr(p.id)+'" data-duty-annual-date="'+date+'" title="'+escapeAttr(date+'｜'+(c?.away?'不在':c?.island?'島休':'留守')+(details?'｜'+details:''))+'">'+items.slice(0,2).map(x=>'<span class="dutyAnnualTag '+x.kind+'">'+escapeHtml(x.label)+'</span>').join('')+(items.length>2?'<span class="dutyAnnualMore">…</span>':'')+'</button></td>'}html+='</tr>'}canvas.innerHTML=html+'</tbody></table>';canvas.scrollTo(scroll.x,scroll.y)}
+document.getElementById('openDutyAnnual').onclick=()=>{dutyAnnualYear=+currentDate.slice(0,4);renderDutyAnnual();document.getElementById('dutyAnnualModal').classList.add('show')};
+document.getElementById('dutyAnnualYear').onchange=e=>{const year=Number(e.target.value);if(!Number.isInteger(year)||year<2000||year>2100){e.target.value=dutyAnnualYear;return}dutyAnnualYear=year;document.getElementById('dutyAnnualCanvas').scrollTo(0,0);renderDutyAnnual()};
+document.getElementById('dutyAnnualScope').onchange=e=>{dutyAnnualScope=e.target.value;renderDutyAnnual()};document.getElementById('dutyAnnualSize').onchange=e=>{dutyAnnualSize=+e.target.value;renderDutyAnnual()};
+document.getElementById('dutyAnnualMonths').onclick=e=>{const button=e.target.closest('[data-duty-month]');if(!button)return;const canvas=document.getElementById('dutyAnnualCanvas'),target=canvas.querySelector('[data-duty-month-start="'+button.dataset.dutyMonth+'"]');if(target)canvas.scrollTo({left:Math.max(0,target.offsetLeft-110),behavior:'smooth'})};
+document.getElementById('dutyAnnualCanvas').onclick=e=>{const b=e.target.closest('[data-duty-annual-person]');if(!b)return;const p=ops.data.roster.people.find(x=>x.id===b.dataset.dutyAnnualPerson),date=b.dataset.dutyAnnualDate,r=dutyAnnualDetails.get(p.id+'|'+date);document.getElementById('dutyAnnualDetailTitle').textContent=(p?.name||'人員')+'｜'+date;document.getElementById('dutyAnnualDetailBody').innerHTML='<div>狀態：'+(r?.away?'不在':r?.island?'島休':'留守')+'</div>'+(r?.items.length?r.items.map(x=>'<div><span class="dutyAnnualTag '+x.kind+'">'+escapeHtml(x.label)+'</span></div>').join(''):'<div>沒有衛哨、值星或日代紀錄</div>');document.getElementById('dutyAnnualDetail').classList.add('show')};
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function escapeAttr(s){return escapeHtml(s)}
+
+document.addEventListener('click',e=>{
+  const sp=e.target.closest('[data-setting-page]');
+  if(sp){
+    document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id==='settings'));
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.settingsPage').forEach(x=>x.classList.toggle('active',x.id===sp.dataset.settingPage));
+    renderSettings();
+  }
+  const tab=e.target.closest('[data-tab]');if(tab){
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===tab));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===tab.dataset.tab));
+    if(tab.dataset.tab==='rollcall'){dayData(currentDate).checks={};saveSchedule();renderRollcall();}
+    if(tab.dataset.tab==='settings')renderSettings();
+    if(tab.dataset.tab==='manpowerControl')renderManpowerControl();
+    if(tab.dataset.tab==='personTimelinePage')renderPersonTimeline();
+    if(tab.dataset.tab==='manpowerTimelinePage')renderManpowerTimeline();
+    if(tab.dataset.tab==='outsidePage')renderOutside();
+  }
+  if(e.target.dataset.quickGuard){const [g,s]=e.target.dataset.quickGuard.split(':').map(Number);openQuick('guard',[g,s])}
+  if(e.target.dataset.quickDuty!==undefined){
+    const row=+e.target.dataset.quickDuty,rec=dayData(currentDate).duties[row];
+    if(rec?.dutyIndex!==null)openDutyPeople(row);else showToast('請先選擇勤務');
+  }
+  if(e.target.dataset.pickPerson!==undefined){
+    const idx=+e.target.dataset.pickPerson,dd=dayData(currentDate);
+    if(modalTarget.kind==='guard'){const [g,s]=modalTarget.ref;Object.assign(dd.guards.find(x=>x.guardPoint===g&&x.slot===s),{person:getPersonName(idx),personId:personId(settings.people[idx])})}
+    else if(modalTarget.kind==='duty'){
+      const row=modalTarget.meta?.row;
+      if(Number.isInteger(row) && dd.duties[row])dd.duties[row].people=[{id:personId(settings.people[idx]),name:getPersonName(idx)}];
+    }
+    saveSchedule();document.getElementById('personModal').classList.remove('show');renderSchedule();
+  }
+  if(e.target.dataset.close)document.getElementById(e.target.dataset.close).classList.remove('show');
+  if(e.target.dataset.mask!==undefined){
+    const idx=+document.getElementById('dutySettingSelect').value,m=+e.target.dataset.mask;
+    settings.duties[idx].mask[m]=!settings.duties[idx].mask[m];saveSettings();renderDutySettingEditor(idx);renderSchedule();
+  }
+  const checkPerson=e.target.closest('[data-checkperson]');if(checkPerson){const i=checkPerson.dataset.checkperson,dd=dayData(currentDate);dd.checks[i]=!dd.checks[i];saveSchedule();renderRollcall()}
+});
+document.addEventListener('change',e=>{
+  if(e.target.dataset.dutyPick!==undefined&&modalTarget?.kind==='dutyMulti'){e.target.checked?modalTarget.selected.add(e.target.dataset.dutyPick):modalTarget.selected.delete(e.target.dataset.dutyPick)}
+  if(e.target.dataset.sourcePage!==undefined){const id=e.target.dataset.sourcePage,set=new Set(settings.sourcePages);e.target.checked?set.add(id):set.delete(id);settings.sourcePages=[...set];saveSettings()}
+  if(e.target.dataset.personNoquick!==undefined){const i=+e.target.dataset.personNoquick;settings.people[i].noQuick=e.target.checked;rememberPersonDutyState(i);saveSettings();renderSchedule()}
+  if(e.target.id==='datePick'){currentDate=e.target.value;renderSchedule();renderNewPages()}
+  if(e.target.id==='dutyCount'){const dd=dayData(currentDate);dd.dutyCount=+e.target.value;saveSchedule();renderSchedule()}
+  if(e.target.dataset.dutySelect!==undefined){const i=+e.target.dataset.dutySelect,v=e.target.value,rec=dayData(currentDate).duties[i];rec.dutyIndex=v===''?null:+v;if(rec.dutyIndex!==null){const tpl=settings.duties[rec.dutyIndex];rec.name=tpl.name;rec.paint=JSON.parse(JSON.stringify(tpl.paint||{}));rec.outside=!!tpl.outside}else{delete rec.name;delete rec.paint;delete rec.outside}saveSchedule();renderSchedule()}
+  if(e.target.dataset.guardInput){const [g,s]=e.target.dataset.guardInput.split(':').map(Number);const rec=dayData(currentDate).guards.find(x=>x.guardPoint===g&&x.slot===s),name=String(e.target.value||'').trim(),matches=settings.people.filter(p=>p.name===name);if(matches.length>1){showToast('有同名人員，請使用選人按鈕指定');e.target.value=rec.person||'';return}rec.person=name;rec.personId=matches.length===1?personId(matches[0]):'';checkTypedPerson(e.target);saveSchedule();renderSchedule()}
+  if(e.target.id==='guardPointCount'){settings.guardPointCount=+e.target.value;saveSettings();renderSettings();renderSchedule()}
+  if(e.target.id==='dutySettingSelect'){renderDutySettingEditor(+e.target.value)}
+  if(e.target.dataset.personIgnore!==undefined){const i=+e.target.dataset.personIgnore;settings.people[i].ignore=e.target.checked;rememberPersonDutyState(i);saveSettings();renderSchedule()}
+  if(e.target.dataset.personEarly!==undefined){const i=+e.target.dataset.personEarly;settings.people[i].earlyIslandLeave=e.target.checked;rememberPersonDutyState(i);saveSettings();renderNewPages()}
+  if(e.target.dataset.personNooutside!==undefined){const i=+e.target.dataset.personNooutside;settings.people[i].noOutside=e.target.checked;rememberPersonDutyState(i);saveSettings();renderOutside()}
+  if(e.target.dataset.personColumn!==undefined){settings.manpower.display[e.target.dataset.personColumn]=e.target.checked;saveSettings();renderPersonnelSettings()}
+  if(e.target.dataset.zonePick!==undefined&&zonePicker){e.target.checked?zonePicker.selected.add(e.target.dataset.zonePick):zonePicker.selected.delete(e.target.dataset.zonePick)}
+  if(e.target.id==='timelineSpan'){settings.manpower.span=+e.target.value;saveSettings();renderPersonTimeline();renderManpowerTimeline()}
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='rollTime')e.target.value=String(e.target.value||'').replace(/\D/g,'').slice(0,4);
+  if(e.target.dataset.gpName!==undefined){settings.guardPoints[+e.target.dataset.gpName].name=e.target.value;saveSettings();renderSchedule()}
+  if(e.target.dataset.gpOffset!==undefined){const v=Number(e.target.value);settings.guardPoints[+e.target.dataset.gpOffset].offset=Number.isFinite(v)?v:0;saveSettings()}
+  if(e.target.dataset.sh){
+    const [g,i,k]=e.target.dataset.sh.split(':'),gp=settings.guardPoints[+g];
+    while(gp.shifts.length<=+i)gp.shifts.push({start:'',end:'',type:'日哨',restPaint:{}});
+    gp.shifts[+i][k]=(k==='start'||k==='end')?(e.target.value===''?'':Number(e.target.value)):e.target.value;
+    gp.shifts=gp.shifts.filter((x,idx)=>idx<=+i || x.start!=='' || x.end!=='');
+    saveSettings();renderSchedule();
+  }
+  if(e.target.dataset.personName!==undefined){settings.people[+e.target.dataset.personName].name=e.target.value;saveSettings();renderSchedule()}
+  if(e.target.dataset.tempRank!==undefined){settings.people[+e.target.dataset.tempRank].rank=e.target.value;saveSettings();renderSchedule()}
+  if(e.target.dataset.personNote!==undefined){const i=+e.target.dataset.personNote;settings.people[i].note=e.target.value;rememberPersonDutyState(i);saveSettings()}
+  if(e.target.id==='dutySettingName'){const i=+document.getElementById('dutySettingSelect').value;if(settings.duties[i].systemKey)return;settings.duties[i].name=e.target.value;saveSettings();renderSchedule()}
+});
+document.getElementById('dutySettingOutside').addEventListener('change',e=>{const i=+document.getElementById('dutySettingSelect').value;settings.duties[i].outside=e.target.checked;saveSettings();renderSchedule()});
+document.getElementById('prevDay').onclick=()=>{currentDate=addDays(currentDate,-1);document.getElementById('datePick').value=currentDate;renderSchedule();renderNewPages()};
+document.getElementById('nextDay').onclick=()=>{currentDate=addDays(currentDate,1);document.getElementById('datePick').value=currentDate;renderSchedule();renderNewPages()};
+document.getElementById('todayBtn').onclick=()=>{currentDate=todayStr();document.getElementById('datePick').value=currentDate;renderSchedule();renderNewPages()};
+document.getElementById('tomorrowBtn').onclick=()=>{currentDate=addDays(todayStr(),1);document.getElementById('datePick').value=currentDate;renderSchedule();renderNewPages()};
+const dutyFiles=ShionData.fileActions({loaded:()=>{location.reload();return false;},beforeExport:async()=>{if(!await saveSchedule())throw Error('請重新載入後再匯出');}});document.getElementById('dutySave').onclick=()=>saveSchedule();document.getElementById('dutyExport').onclick=dutyFiles.export;document.getElementById('dutyImport').onclick=dutyFiles.load;
+document.getElementById('systemMenuBtn').onclick=()=>document.getElementById('systemMenuModal').classList.add('show');
+document.getElementById('openTextExport').onclick=openTextExport;
+document.getElementById('textExportSelectAll').onclick=()=>document.querySelectorAll('[data-text-export-line]').forEach(x=>x.checked=true);
+document.getElementById('textExportSelectNone').onclick=()=>document.querySelectorAll('[data-text-export-line]').forEach(x=>x.checked=false);
+document.getElementById('textExportBuild').onclick=()=>{document.getElementById('textExportEditor').value=composeTextExport();document.getElementById('textExportSelectModal').classList.remove('show');document.getElementById('textExportEditModal').classList.add('show')};
+document.getElementById('textExportBack').onclick=()=>{document.getElementById('textExportEditModal').classList.remove('show');document.getElementById('textExportSelectModal').classList.add('show')};
+document.getElementById('textExportCopy').onclick=copyTextExport;
+document.getElementById('carryYesterdayDuty').onclick=carryYesterdayDuties;
+document.getElementById('carryRoutineDuty').onclick=carryRoutineDuties;
+document.getElementById('syncPersonnel').onclick=()=>syncPersonnel(true);
+document.getElementById('addTemporaryPerson').onclick=()=>{settings.people.push({source:'temporary',personId:'temp_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:'',rank:'',buildName:'臨時人員',businessNames:[],note:'',noQuick:false,ignore:false,earlyIslandLeave:false,noOutside:false});saveSettings();renderPersonnelSettings()};
+document.getElementById('temporaryPeopleBody').addEventListener('click',e=>{if(e.target.dataset.tempDelete===undefined)return;const i=+e.target.dataset.tempDelete;settings.people.splice(i,1);saveSettings();renderPersonnelSettings();renderSchedule()});
+document.getElementById('rollNow').onclick=()=>{document.getElementById('rollTime').value=hhmmNow();dayData(currentDate).checks={};saveSchedule();renderRollcall()};
+document.getElementById('refreshRoll').onclick=()=>{dayData(currentDate).checks={};saveSchedule();renderRollcall()};
+document.getElementById('dutySettingSelect').addEventListener('change',()=>renderDutySettingEditor(+document.getElementById('dutySettingSelect').value));
+
+document.addEventListener('click',e=>{
+ if(e.target.id==='applyDutyPeople'&&modalTarget?.kind==='dutyMulti'){const rec=dayData(currentDate).duties[modalTarget.row];rec.people=[...modalTarget.selected].map(id=>{const p=personById(id);return{id,name:p?.name||''}}).filter(x=>x.name);saveSchedule();document.getElementById('personModal').classList.remove('show');renderSchedule();renderNewPages()}
+ const removeDuty=e.target.closest('[data-remove-duty-person]');if(removeDuty){const rec=dayData(currentDate).duties[+removeDuty.dataset.removeDutyPerson],id=removeDuty.dataset.dutyPersonId,name=removeDuty.dataset.dutyPersonName;rec.people=dutyPeople(rec).filter(x=>id?x.id!==id:x.name!==name);saveSchedule();renderSchedule();renderNewPages()}
+ const clearDuty=e.target.closest('[data-clear-duty]');if(clearDuty){const rec=dayData(currentDate).duties[+clearDuty.dataset.clearDuty];rec.dutyIndex=null;rec.people=[];delete rec.name;delete rec.paint;delete rec.outside;saveSchedule();renderSchedule();renderNewPages()}
+ const za=e.target.closest('[data-zone-add]');if(za)openZonePicker(za.dataset.zoneAdd);
+ const ze=e.target.closest('[data-zone-edit]');if(ze)openZoneEditor(ze.dataset.zoneEdit,ze.dataset.zonePerson);
+ if(e.target.id==='zonePickerApply')applyZonePicker();if(e.target.id==='zoneEditApply')moveZone(false);if(e.target.id==='zoneEditRemove')moveZone(true);
+ const gr=e.target.closest('[data-grain]');if(gr){settings.manpower.grain=+gr.dataset.grain;document.querySelectorAll('[data-grain]').forEach(x=>x.classList.toggle('active',x===gr));saveSettings();renderPersonTimeline();renderManpowerTimeline()}
+ const tp=e.target.closest('[data-timeline-person]');if(tp){const s=+tp.dataset.timelineTime,a=aggregatePerson(tp.dataset.timelinePerson,s,s+settings.manpower.grain*60000);showTimelineDetail((personById(tp.dataset.timelinePerson)?.name||tp.dataset.timelinePerson)+'｜'+timelineLabel(s),a.reasons.concat(a.conflict?['⚠ 勤務與背景狀態衝突']:[]))}
+ const mp=e.target.closest('[data-manpower-kind]');if(mp){const s=+mp.dataset.manpowerTime,ps=allNamedPeople().filter(p=>!p.ignore&&aggregatePerson(personId(p),s,s+settings.manpower.grain*60000).kind===mp.dataset.manpowerKind),names=ps.map(p=>(p.rank?p.rank+' ':'')+p.name);showTimelineDetail(timelineLabel(s)+'｜'+mp.dataset.manpowerKind+'｜'+manpowerCountText(ps.map(personId)),names)}
+ const av=e.target.closest('[data-availability-person]');if(av){const s=+av.dataset.availabilityTime,a=aggregatePerson(av.dataset.availabilityPerson,s,s+settings.manpower.grain*60000);showTimelineDetail((personById(av.dataset.availabilityPerson)?.name||av.dataset.availabilityPerson)+'｜'+timelineLabel(s),a.reasons)}
+ const rest=e.target.closest('[data-guard-rest]');if(rest){const [g,s]=rest.dataset.guardRest.split(':').map(Number);openGuardRest(g,s)}
+ const editDuty=e.target.closest('[data-edit-daily-duty]');if(editDuty)openDailyDuty(+editDuty.dataset.editDailyDuty);
+ const tool=e.target.closest('[data-paint-tool]');if(tool){paintTool=tool.dataset.paintTool;document.querySelectorAll('[data-paint-tool]').forEach(x=>x.classList.toggle('on',x===tool))}
+ const dailyTool=e.target.closest('[data-daily-tool]');if(dailyTool){dailyDutyTool=dailyTool.dataset.dailyTool;document.querySelectorAll('[data-daily-tool]').forEach(x=>x.classList.toggle('on',x===dailyTool))}
+});
+document.getElementById('dutyPaintView').addEventListener('change',()=>renderDutySettingEditor(+document.getElementById('dutySettingSelect').value));
+document.getElementById('dutyMask').addEventListener('pointerdown',e=>{const c=e.target.closest('[data-paint-slot]');if(!c)return;e.preventDefault();paintDragging=true;c.setPointerCapture?.(e.pointerId);paintDutyCell(c)});
+document.getElementById('dutyMask').addEventListener('pointerover',e=>{const c=e.target.closest('[data-paint-slot]');if(c&&paintDragging)paintDutyCell(c)});document.addEventListener('pointerup',()=>paintDragging=false);
+document.getElementById('guardRestView').addEventListener('change',renderGuardRest);document.getElementById('guardRestGrid').addEventListener('pointerdown',e=>{const c=e.target.closest('[data-guard-rest-slot]');if(!c)return;e.preventDefault();guardRestDragging=true;const sh=guardRestShift();guardRestPaintValue=!sh.restPaint[+c.dataset.guardRestSlot];paintGuardRest(c,guardRestPaintValue)});document.getElementById('guardRestGrid').addEventListener('pointerover',e=>{const c=e.target.closest('[data-guard-rest-slot]');if(c&&guardRestDragging)paintGuardRest(c,guardRestPaintValue)});document.addEventListener('pointerup',()=>{if(guardRestDragging){guardRestDragging=false;saveSettings();renderNewPages()}});document.getElementById('clearGuardRest').onclick=()=>{const sh=guardRestShift();if(!sh)return;sh.restPaint={};saveSettings();renderGuardRest();renderNewPages()};
+document.getElementById('dailyDutyReset').onclick=()=>{if(systemTimeTarget){const {key,period}=systemTimeTarget;delete sysDay(currentDate,key).overrides[period];activeDailyRecord()}else if(dailyDutyTarget!==null){const rec=activeDailyRecord();rec.paint=structuredClone(settings.duties[rec.dutyIndex]?.paint||{})}saveSchedule();renderDailyDuty();refreshAll()};
+document.getElementById('dailyDutyView').addEventListener('change',renderDailyDuty);document.getElementById('dailyDutyName').addEventListener('input',e=>{if(dailyDutyTarget===null)return;dayData(currentDate).duties[dailyDutyTarget].name=e.target.value;saveSchedule()});document.getElementById('dailyDutyGrid').addEventListener('pointerdown',e=>{const c=e.target.closest('[data-daily-slot]');if(!c)return;e.preventDefault();dailyDutyDragging=true;paintDailyDuty(c)});document.getElementById('dailyDutyGrid').addEventListener('pointerover',e=>{const c=e.target.closest('[data-daily-slot]');if(c&&dailyDutyDragging)paintDailyDuty(c)});document.addEventListener('pointerup',()=>{if(dailyDutyDragging){dailyDutyDragging=false;saveSchedule();renderSchedule();renderNewPages()}});
+
+function islandEvents(id,ds){const p=personById(id),base=new Date(ds+'T00:00:00').getTime(),events=[],push=(start,end,kind,reason,priority,group)=>events.push({s:base+start*60000,e:base+end*60000,kind,reason,priority,group,background:'island'});if(ops.islandIds(ds,'island_full').includes(id))push(p?.earlyIslandLeave?360:480,1440+460,'callable','全島・限制調度',40,'全島');if(ops.islandIds(ds,'island_am').includes(id))push(p?.earlyIslandLeave?360:460,840,'callable','上半島・限制調度',40,'上半島');if(ops.islandIds(ds,'island_pm').includes(id))push(840,1440+460,'callable','下半島・限制調度',40,'下半島');if(ops.islandIds(ds,'overnight').includes(id)){push(1080,1440+360,'overnight','外宿',60,'外宿');push(1440+360,1440+460,'callable','外宿待收假',60,'外宿')}return events}
+function rollIslandCategory(id,base){const ds=ymd(new Date(base)),ev=[...islandEvents(id,addDays(ds,-1)),...islandEvents(id,ds)].filter(e=>e.s<=base&&base<e.e).sort((a,b)=>b.priority-a.priority);const e=ev[0];return e?{group:e.group,note:e.reason,kind:e.kind}:null}
+function manpowerEvents(identity,fromDs,toDs){const p=personById(identity)||personByName(identity),id=personId(p),name=p?.name||identity,out=[];for(let o=-2;o<=2;o++){const ds=addDays(fromDs,o),dd=dayData(ds);dd.guards.forEach(g=>{if(g.personId?g.personId===id:g.person===name){const off=Number(settings.guardPoints?.[g.guardPoint]?.offset)||0,delta=Math.round(off*60)*60000,key=ds+':guard:'+g.guardPoint+':'+g.slot;out.push({s:g.start+delta,e:g.end+delta,kind:'guard',reason:'衛哨 '+(settings.guardPoints[g.guardPoint]?.name||'')+' '+shortRange(g.start+delta,g.end+delta),priority:110,assignment:true,assignmentType:'guard',assignmentKey:key});out.push(...guardRestEvents(ds,g).map(e=>({...e,assignment:true,assignmentType:'guard-rest',assignmentKey:key+':rest'})))}});dd.duties.forEach((r,i)=>{if(r.dutyIndex!==null&&dutyPeople(r).some(x=>x.id?x.id===id:x.name===name))out.push(...dutyRecordEvents(ds,r).map(e=>({...e,assignmentKey:ds+':duty:'+i})))});if(p)out.push(...specialIntervalsFor(id,ds),...systemEventsFor(id,ds),...islandEvents(id,ds))}return out}
+let availabilityEventsCache=null;
+function resolvedPerson(identity,ms){const ds=ymd(new Date(ms)),cacheKey=identity+'|'+ds;let candidate=availabilityEventsCache?.get(cacheKey);if(!candidate){candidate=manpowerEvents(identity,addDays(ds,-1),addDays(ds,1));availabilityEventsCache?.set(cacheKey,candidate)}const events=candidate.filter(e=>e.s<=ms&&ms<e.e),assignments=events.filter(e=>e.assignment),severity=e=>['duty','guard'].includes(e.kind)?3:2;assignments.sort((a,b)=>severity(b)-severity(a));const passive=events.filter(e=>!e.assignment).sort((a,b)=>b.priority-a.priority);if(!events.length)return{kind:'green',willAttend:true,reason:'可用',events:[],conflict:false,assignment:false};const chosen=assignments[0]||passive[0],names=[...new Set(assignments.map(e=>e.reason))],keys=new Set(assignments.map(e=>e.assignmentKey||e.reason)),blocked=passive.some(e=>['absent','overnight','callable'].includes(e.kind)),standby=assignments.some(e=>e.systemKey==='standby'),outside=assignments.some(e=>e.outside),p=personById(identity)||personByName(identity),standbyGuard=standby&&assignments.some(e=>e.kind==='guard')&&new Date(ms).getHours()>=8&&new Date(ms).getHours()<21;return{kind:chosen.kind,willAttend:assignments.length?false:STATE_DEFS[chosen.kind].willAttend,reason:assignments.length?names.join('、'):chosen.reason,events,assignment:assignments.length>0,conflict:keys.size>1||!!(assignments.length&&blocked)||!!(standby&&outside)||!!standbyGuard}}
+function aggregatePerson(identity,s,e){const rank={green:0,standby:1,yellow:2,callable:3,blue:2,absent:4,overnight:4,guard:6,duty:6},reasons=new Set();let best=null,conflict=false;for(let m=s;m<e;m+=600000){const r=resolvedPerson(identity,m);if(!best||(r.assignment&&!best.assignment)||(r.assignment===best.assignment&&rank[r.kind]>rank[best.kind]))best=r;reasons.add(r.reason);conflict||=r.conflict}return{kind:best?.kind||'green',assignment:!!best?.assignment,reasons:[...reasons],conflict}}
+
+document.getElementById('datePick').value=currentDate;
+document.getElementById('rollTime').value=hhmmNow();
+if(readPersonnelBridge())syncPersonnel(false);
+renderSettings();
+renderSchedule();
+document.getElementById('timelineSpan').value=String(settings.manpower.span);document.querySelectorAll('[data-grain]').forEach(x=>x.classList.toggle('active',+x.dataset.grain===settings.manpower.grain));renderNewPages();
+})();
+</script>
+
+</body>
+</html>
