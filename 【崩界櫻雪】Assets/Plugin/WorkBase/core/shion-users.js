@@ -8,7 +8,7 @@ const USERS=[
  {id:'sheep',emoji:'🐑',name:'綿羊',password:'sheep'},
  {id:'snake',emoji:'🐍',name:'蛇蛇',password:'susu'},
  {id:'clover',emoji:'🍀',name:'幸運草',password:'clover'},
- {id:'tea',emoji:'🍁',name:'楓葉',password:'tea'},
+ {id:'tea',emoji:'🍁',name:'楓葉',password:'op161616'},
  {id:'lion',emoji:'🦁',name:'獅子',password:'lion'},
  {id:'tree',emoji:'🌲',name:'松樹',password:'tree'},
  {id:'whale',emoji:'🐋',name:'藍鯨',password:'whale'},
