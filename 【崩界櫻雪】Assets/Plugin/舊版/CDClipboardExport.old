@@ -1,0 +1,509 @@
+/*
+==================================================
+CDClipboardExport
+Version : 1.00
+
+用途：
+- 將 CharacterData 4.x 的 Timeline status 匯出為純文字。
+- 資料來源固定為 window.CDTimelineCore.getState()。
+- 不讀 Render DOM，不受 PC／手機版 Render 結構影響。
+- 參考 CharacterData 2.1 的剪貼簿格式，改接新版 fields / managers / global。
+- 自動接管 CodexHeader 的 cd-clipboard-shell 按鈕。
+
+第一版策略：
+- 保留舊版段落與問答格式。
+- 主題、武器、戰力改讀新版 status。
+- SC modes、slot 編號、registry 等控制資料不輸出。
+==================================================
+*/
+
+(function(global){
+  'use strict';
+
+  const VERSION = '1.00';
+  const MODAL_ID = 'CDClipboardExportModal';
+  const STYLE_ID = 'CDClipboardExportStyle';
+  const BUTTON_ID = 'cd-clipboard-shell';
+
+  const QA_GROUPS = Object.freeze([
+    {
+      title:'心靈問答（本人回答）',
+      key:'mind',
+      questions:[
+        ['q1','一級：有什麼一直在做的事情？是自願的還是被迫的？'],
+        ['q2','一級：期望自己成為什麼樣的人？而實際上別人怎麼看你？'],
+        ['q3','一級：如果你不在這世界上，對世界會有什麼影響？'],
+        ['q4','一級：曾經後悔過什麼事情嗎？'],
+        ['q5','一級：你唯一願意的示弱對象是誰？']
+      ]
+    },
+    {
+      title:'社交問答（本人回答）',
+      key:'social',
+      questions:[
+        ['q1','三級：目前的工作是什麼？工作態度為何？'],
+        ['q2','二級：家庭狀況如何？有無特殊背景或成長經歷？'],
+        ['q3','二級：現階段有無親密友人？'],
+        ['q4','二級：對戀愛的積極度與心態為何？'],
+        ['q5','二級：最敬佩或是最喜歡的人是誰？']
+      ]
+    },
+    {
+      title:'外在形象（他人描述）',
+      key:'appearance',
+      questions:[
+        ['q1','三級：給人的外在印象為何？個性與長相？'],
+        ['q2','二級：有無特殊技能或興趣？大家有何看法？']
+      ]
+    }
+  ]);
+
+  const APTITUDE_ORDER = Object.freeze([
+    '前衛','防衛者','中衛','狙擊','前衛魔導士','後衛魔導士','輔助','治療'
+  ]);
+
+  function clone(value){
+    return JSON.parse(JSON.stringify(value ?? null));
+  }
+
+  function text(value){
+    return value == null ? '' : String(value);
+  }
+
+  function trim(value){
+    return text(value).trim();
+  }
+
+  function has(value){
+    return trim(value) !== '';
+  }
+
+  function field(status, key){
+    return status?.fields?.[key] ?? '';
+  }
+
+  function list(value){
+    if(Array.isArray(value)) return value;
+    if(value && typeof value === 'object') return Object.values(value);
+    return [];
+  }
+
+  function enabled(item){
+    return !!item && item.enabled !== false;
+  }
+
+  function currentTitle(){
+    return trim(global.CodexHeader?.getTitle?.()) || trim(document.title) || 'CharacterData';
+  }
+
+  function calcAge(dataYear, birthday){
+    const year = Number((trim(dataYear).match(/\d{3,4}/) || [])[0]);
+    const birth = Number((trim(birthday).match(/\d{3,4}/) || [])[0]);
+    return Number.isFinite(year) && Number.isFinite(birth) && year >= birth
+      ? String(year - birth)
+      : '';
+  }
+
+  function branchId(snapshot, type, index, status){
+    const rawId = trim(status?.fields?.['SysMeta.characterIndex']);
+    const root = rawId.length > 1 ? rawId.slice(0, -1) : rawId;
+    const computed = root ? `${root}${index}` : `${type === 'rtl' ? 'R' : ''}未設定${index}`;
+    return type === 'rtl' && !computed.startsWith('R') ? `R${computed}` : computed;
+  }
+
+  function getSnapshot(){
+    if(!global.CDTimelineCore?.getState){
+      throw new Error('CDTimelineCore 尚未載入。');
+    }
+    return global.CDTimelineCore.getState();
+  }
+
+  function getTarget(snapshot, type, index){
+    const sandbox = snapshot?.[type];
+    const status = sandbox?.slots?.[index - 1];
+    if(!sandbox || !status) throw new Error(`找不到 ${type.toUpperCase()}${index} status。`);
+    return { sandbox, status };
+  }
+
+  function makeWriter(){
+    const lines = [];
+    const pushLine = (value='') => lines.push(text(value));
+    const pushDivider = (label='') => lines.push(`—  ${trim(label)}  —`);
+    const pushKV = (label, value='') => lines.push(`${text(label)}${text(value)}`);
+    const pushMultiline = (value='') => {
+      text(value).split(/\r?\n/).forEach(line => pushLine(line));
+    };
+    const pushBullets = values => values.forEach(value => pushLine(`• ${text(value)}`));
+    const finish = () => lines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+    return { pushLine, pushDivider, pushKV, pushMultiline, pushBullets, finish };
+  }
+
+  function buildText(payload){
+    const snapshot = payload?.snapshot || getSnapshot();
+    const type = payload?.type === 'rtl' ? 'rtl' : 'tl';
+    const index = Math.max(1, Math.min(9, Number(payload?.index) || 1));
+    const { sandbox, status } = getTarget(snapshot, type, index);
+    const w = makeWriter();
+
+    const f = status.fields || {};
+    const m = status.managers || {};
+    const globalData = sandbox.global || {};
+
+    const pushField = (label, key, suffix='') => {
+      const value = f[key];
+      if(has(value)) w.pushKV(label, `${text(value)}${suffix}`);
+    };
+
+    w.pushLine(payload?.title || currentTitle());
+    w.pushLine('');
+
+    w.pushDivider('SysMeta');
+    pushField('角色ID：', 'SysMeta.characterIndex');
+    pushField('設定層級：', 'SysMeta.settingLayer');
+    pushField('演算層級：', 'SysMeta.computeLayer');
+    pushField('所屬世代：', 'SysMeta.generation');
+    pushField('數據年份：', 'SysMeta.dataYear', '年');
+    if(has(f['SysMeta.branch'])){
+      w.pushKV('分支註記：', '');
+      const items = text(f['SysMeta.branch']).split(/\r?\n/).map(trim).filter(Boolean);
+      w.pushBullets(items);
+    }
+    w.pushLine('');
+
+    w.pushDivider('基本資訊');
+    pushField('全名：', 'basic.fullname');
+    pushField('讀音：', 'basic.nameRuby');
+    pushField('語系：', 'basic.nameTag');
+    pushField('性別：', 'basic.gender');
+    pushField('種族：', 'basic.race');
+    if(has(f['basic.height'])) w.pushKV('身高：', `${f['basic.height']} cm`);
+    if(has(f['basic.cupSize'])){
+      const value = trim(f['basic.cupSize']);
+      w.pushKV('胸圍：', value === '－' ? '' : `${value} Cup`);
+    }
+    pushField('髮色：', 'basic.haircolor');
+    pushField('瞳色：', 'basic.eyescolor');
+    pushField('生日：', 'basic.birthday');
+    const age = calcAge(f['SysMeta.dataYear'], f['basic.birthday']);
+    if(age) w.pushKV('年齡：', age);
+    w.pushLine('');
+
+    w.pushDivider('地域資訊');
+    const birthCity = trim(f['region.birth.city']);
+    const birthNote = trim(f['region.birth.note']);
+    if(birthCity || birthNote){
+      w.pushKV('出生都市：', `${birthCity}${birthNote ? `（${birthNote}）` : ''}`);
+    }
+    list(m.region).filter(enabled).forEach(item => {
+      const city = trim(item?.city);
+      const note = trim(item?.note);
+      if(city || note) w.pushKV('居住都市：', `${city}${note ? `（${note}）` : ''}`);
+    });
+    w.pushLine('');
+
+    w.pushDivider('學業資訊');
+    list(m.education).filter(enabled).forEach(row => {
+      const school = trim(row?.school);
+      const note = trim(row?.note);
+      if(school || note) w.pushKV('', `學歷：${school}${note ? `（${note}）` : ''}`);
+      list(row?.items).filter(enabled).forEach(item => {
+        const parts = [item?.class, item?.dept, item?.group].map(trim).filter(Boolean);
+        if(parts.length) w.pushKV('', `科系：${parts.join(' / ')}`);
+      });
+    });
+    w.pushLine('');
+
+    w.pushDivider('就業資訊');
+    list(m.employmentMilitary).filter(enabled).forEach(item => {
+      const year = trim(item?.year).replace(/年$/, '');
+      const parts = [year ? `${year}年` : '', item?.org, item?.rank, item?.position].map(trim).filter(Boolean);
+      if(parts.length) w.pushKV('', parts.join('-'));
+    });
+    list(m.employmentGeneral).filter(enabled).forEach(item => {
+      const year = trim(item?.year).replace(/年$/, '');
+      const parts = [year ? `${year}年` : '', item?.org, item?.position].map(trim).filter(Boolean);
+      if(parts.length) w.pushKV('', parts.join('-'));
+    });
+    w.pushLine('');
+
+    w.pushDivider('基本個性');
+    if(has(f['personality.public'])){
+      w.pushKV('公開特徵：', '');
+      w.pushMultiline(f['personality.public']);
+      w.pushLine('');
+    }
+    if(has(f['personality.secret'])){
+      w.pushKV('非公開特徵：', '');
+      w.pushMultiline(f['personality.secret']);
+    }
+    w.pushLine('');
+
+    w.pushDivider('主題紀錄');
+    const topicRegistry = list(globalData?.topic?.registry).map(Number);
+    const topicSort = list(globalData?.topic?.sort).map(Number);
+    const topicOrder = [
+      ...topicSort.filter(slot => topicRegistry.includes(slot)),
+      ...topicRegistry.filter(slot => !topicSort.includes(slot))
+    ];
+    let topicCount = 0;
+    topicOrder.forEach(slot => {
+      const item = m.topicSlots?.[String(slot)] || m.topicSlots?.[`slot${String(slot).padStart(2,'0')}`];
+      if(!enabled(item)) return;
+      const title = trim(item?.title);
+      const body = trim(item?.body);
+      if(!title && !body) return;
+      topicCount += 1;
+      if(title) w.pushLine(`事件：${title}`);
+      if(body) w.pushMultiline(body);
+      w.pushLine('');
+    });
+    if(!topicCount) w.pushLine('（無資料）');
+    w.pushLine('');
+
+    w.pushDivider('戰鬥能力設定');
+    pushField('戰測階級：', 'combat.rank');
+    pushField('主要適性：', 'combat.mainRole');
+    const aptitudes = APTITUDE_ORDER.filter(name => {
+      const value = f[`combat.aptitudes.${name}`];
+      return value === true || value === 'true' || value === 'on' || value === 1 || value === '1';
+    });
+    if(aptitudes.length) w.pushKV('具備適性：', aptitudes.join('、'));
+    pushField('戰鬥特色：', 'combat.feature');
+    if(has(f['combat.detail'])){
+      w.pushKV('戰鬥能力設定：', '');
+      w.pushMultiline(f['combat.detail']);
+    }
+    w.pushLine('');
+
+    w.pushDivider('武器');
+    const weaponRegistry = list(globalData?.weapon?.registry).map(Number);
+    const ownSort = list(m.weaponSort).map(Number);
+    const weaponOrder = [
+      ...ownSort.filter(slot => weaponRegistry.includes(slot)),
+      ...weaponRegistry.filter(slot => !ownSort.includes(slot))
+    ];
+    let weaponCount = 0;
+    weaponOrder.forEach(slot => {
+      const item = m.weaponSlots?.[String(slot)] || m.weaponSlots?.[`slot${String(slot).padStart(2,'0')}`];
+      if(!enabled(item)) return;
+      weaponCount += 1;
+      const name = trim(item?.name) || `武器 ${slot}`;
+      const title = item?.groupType === '套裝武器' ? `${name}x${text(item?.count)}` : name;
+      w.pushLine(title);
+      const kind = [item?.category, item?.type, item?.style].map(trim).filter(Boolean).join(' / ');
+      const spec = [item?.grade, item?.mechanism].map(trim).filter(Boolean).join(' / ');
+      if(kind) w.pushKV('武器種類：', kind);
+      if(spec) w.pushKV('武器規格：', spec);
+      if(has(item?.detail)){
+        w.pushKV('武器細節：', '');
+        w.pushMultiline(item.detail);
+      }
+      w.pushLine('');
+    });
+    if(!weaponCount) w.pushLine('（無資料）');
+    w.pushLine('');
+
+    w.pushDivider('角色問答');
+    QA_GROUPS.forEach(group => {
+      w.pushKV(`${group.title}：`, '');
+      group.questions.forEach(([id, question]) => {
+        const answer = f[`qa.${group.key}.${id}`];
+        w.pushLine(question);
+        w.pushLine(has(answer) ? text(answer) : '（未作答）');
+        w.pushLine('');
+      });
+    });
+
+    w.pushDivider('家族成員');
+    if(has(f['chara.family'])) w.pushMultiline(f['chara.family']);
+    w.pushLine('');
+
+    w.pushDivider('設計雜談');
+    if(has(f['design.Info'])) w.pushMultiline(f['design.Info']);
+
+    return w.finish();
+  }
+
+  async function copyText(value){
+    const output = text(value);
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(output);
+      return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = output;
+    textarea.readOnly = true;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.pointerEvents = 'none';
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    const ok = document.execCommand('copy');
+    textarea.remove();
+    if(!ok) throw new Error('瀏覽器拒絕剪貼簿操作。');
+  }
+
+  function showMessage(message, isError=false){
+    if(typeof global.CDShowToast === 'function'){
+      global.CDShowToast(message, isError ? 2600 : 1700);
+    }else if(isError){
+      alert(message);
+    }
+  }
+
+  function injectStyle(){
+    if(document.getElementById(STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = `
+      .CDClipboardModal{position:fixed;inset:0;z-index:9090;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);backdrop-filter:blur(3px)}
+      .CDClipboardModal[hidden]{display:none!important}
+      .CDClipboardCard{width:min(92vw,560px);padding:10px;border-radius:10px;background:radial-gradient(circle at top,#2b323f 0,#141822 42%,#090b12 100%);border:1px solid rgba(183,143,255,.58);box-shadow:0 0 20px rgba(0,0,0,.78),inset 0 0 16px rgba(183,143,255,.08);color:#e8f4ff}
+      .CDClipboardHead{font-weight:900;letter-spacing:.08em;padding-bottom:7px;border-bottom:1px solid rgba(183,143,255,.35);text-shadow:0 0 6px rgba(183,143,255,.55)}
+      .CDClipboardHint{margin:8px 0 5px;color:#a9bdd2;font-size:12px;line-height:1.45}
+      .CDClipboardSelect{width:100%;height:34px}
+      .CDClipboardPreview{margin-top:8px;padding:7px 9px;border:1px solid rgba(120,210,255,.20);border-radius:7px;background:rgba(6,10,18,.72);color:#cceaff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .CDClipboardFoot{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function buildOptions(snapshot){
+    const options = [];
+    ['tl','rtl'].forEach(type => {
+      const sandbox = snapshot?.[type];
+      if(!sandbox) return;
+      const slots = list(sandbox.meta?.slots);
+      slots.forEach((meta, offset) => {
+        const index = offset + 1;
+        const isCurrent = snapshot.current?.type === type && Number(snapshot.current?.index) === index;
+        if(!meta?.enabled && !isCurrent) return;
+        const status = sandbox.slots?.[offset];
+        const name = trim(meta?.name) || 'null';
+        const id = branchId(snapshot, type, index, status);
+        options.push({ type, index, label:`${type.toUpperCase()}｜${id}-${name}` });
+      });
+    });
+    return options;
+  }
+
+  function ensureModal(){
+    injectStyle();
+    let modal = document.getElementById(MODAL_ID);
+    if(modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = MODAL_ID;
+    modal.className = 'CDClipboardModal';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <div class="CDClipboardCard" role="dialog" aria-modal="true" aria-labelledby="CDClipboardTitle">
+        <div class="CDClipboardHead" id="CDClipboardTitle">剪貼簿匯出</div>
+        <div class="CDClipboardHint">選擇要輸出的 TL／RTL。輸出內容直接讀取 Timeline status，不讀取 Render DOM。</div>
+        <select class="CDClipboardSelect" id="CDClipboardSelect"></select>
+        <div class="CDClipboardPreview" id="CDClipboardPreview"></div>
+        <div class="CDClipboardFoot">
+          <button type="button" id="CDClipboardCancel">取消</button>
+          <button type="button" id="CDClipboardCopy">複製到剪貼簿</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', event => {
+      if(event.target === modal) modal.hidden = true;
+    });
+    modal.querySelector('#CDClipboardCancel')?.addEventListener('click', () => {
+      modal.hidden = true;
+    });
+    modal.querySelector('#CDClipboardSelect')?.addEventListener('change', updatePreview);
+    modal.querySelector('#CDClipboardCopy')?.addEventListener('click', async () => {
+      try{
+        const select = modal.querySelector('#CDClipboardSelect');
+        const [type, rawIndex] = String(select?.value || '').split(':');
+        const snapshot = getSnapshot();
+        const output = buildText({ snapshot, type, index:Number(rawIndex), title:currentTitle() });
+        await copyText(output);
+        modal.hidden = true;
+        showMessage('已複製到剪貼簿 ✅');
+      }catch(error){
+        console.error('[CDClipboardExport] copy failed:', error);
+        showMessage(`剪貼簿匯出失敗：${error?.message || error}`, true);
+      }
+    });
+
+    return modal;
+  }
+
+  function updatePreview(){
+    const modal = document.getElementById(MODAL_ID);
+    if(!modal) return;
+    const select = modal.querySelector('#CDClipboardSelect');
+    const preview = modal.querySelector('#CDClipboardPreview');
+    const option = select?.selectedOptions?.[0];
+    if(preview) preview.textContent = option ? `${currentTitle()}｜${option.textContent}` : '（尚未選擇）';
+  }
+
+  function open(){
+    try{
+      const snapshot = getSnapshot();
+      const options = buildOptions(snapshot);
+      if(!options.length){
+        showMessage('目前沒有可輸出的 TL／RTL。', true);
+        return false;
+      }
+      const modal = ensureModal();
+      const select = modal.querySelector('#CDClipboardSelect');
+      select.replaceChildren();
+      options.forEach(item => {
+        const option = document.createElement('option');
+        option.value = `${item.type}:${item.index}`;
+        option.textContent = item.label;
+        select.appendChild(option);
+      });
+      const currentValue = `${snapshot.current?.type === 'rtl' ? 'rtl' : 'tl'}:${Math.max(1, Number(snapshot.current?.index) || 1)}`;
+      select.value = currentValue;
+      if(select.selectedIndex < 0) select.selectedIndex = 0;
+      updatePreview();
+      modal.hidden = false;
+      return true;
+    }catch(error){
+      console.error('[CDClipboardExport] open failed:', error);
+      showMessage(`剪貼簿匯出失敗：${error?.message || error}`, true);
+      return false;
+    }
+  }
+
+  async function copyCurrent(){
+    const snapshot = getSnapshot();
+    const type = snapshot.current?.type === 'rtl' ? 'rtl' : 'tl';
+    const index = Math.max(1, Number(snapshot.current?.index) || 1);
+    const output = buildText({ snapshot, type, index, title:currentTitle() });
+    await copyText(output);
+    showMessage('已複製目前 Timeline 到剪貼簿 ✅');
+    return output;
+  }
+
+  function interceptToolbarButton(){
+    document.addEventListener('click', event => {
+      const button = event.target?.closest?.(`[data-codex-button-id="${BUTTON_ID}"]`);
+      if(!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      open();
+    }, true);
+  }
+
+  interceptToolbarButton();
+
+  global.CDClipboardExport = Object.freeze({
+    VERSION,
+    open,
+    copyCurrent,
+    buildText,
+    copyText,
+    getVersion:() => VERSION
+  });
+
+})(window);

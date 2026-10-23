@@ -1,0 +1,18 @@
+{
+  "name": "315 QR 檔案搬運工具",
+  "short_name": "QR 檔案搬運",
+  "lang": "zh-Hant",
+  "start_url": "./315-QR檔案搬運工具.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1521",
+  "theme_color": "#142536",
+  "icons": [
+    {
+      "src": "./【崩界櫻雪】Assets/Plugin/WorkBase/qr/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
